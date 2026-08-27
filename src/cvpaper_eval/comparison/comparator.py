@@ -11,7 +11,7 @@ def _group_key(m: Metric) -> tuple[str, str, str, str]:
     return (m.task, m.dataset, m.metric_name, m.metric_variant)
 
 
-def _is_ours(m: Metric) -> bool:
+def is_ours(m: Metric) -> bool:
     return m.method_key.strip().lower() in OURS_KEYS
 
 
@@ -23,8 +23,8 @@ def build_comparisons(metrics: list[Metric]) -> list[Comparison]:
 
     for key in sorted(groups):
         group = groups[key]
-        ours = [m for m in group if _is_ours(m)]
-        others = [m for m in group if not _is_ours(m)]
+        ours = [m for m in group if is_ours(m)]
+        others = [m for m in group if not is_ours(m)]
         for m in ours:
             for other in others:
                 delta = m.value - other.value if m.direction == MetricDirection.HIGHER else other.value - m.value

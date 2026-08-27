@@ -541,7 +541,7 @@
       "dataset": "COCO",
       "metric_name": "APL",
       "metric_variant": "APL",
-      "value": 54.6,
+      "value": 55.0,
       "direction": "higher",
       "method_key": "Faster RCNN-FPN+",
       "source_location": "Table 1",
@@ -553,10 +553,10 @@
       "dataset": "COCO",
       "metric_name": "AP",
       "metric_variant": "AP",
-      "value": 42.0,
+      "value": 43.4,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -565,10 +565,10 @@
       "dataset": "COCO",
       "metric_name": "AP50",
       "metric_variant": "AP50",
-      "value": 62.4,
+      "value": 79.3,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -577,10 +577,10 @@
       "dataset": "COCO",
       "metric_name": "AP75",
       "metric_variant": "AP75",
-      "value": 44.2,
+      "value": 53.8,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -589,10 +589,10 @@
       "dataset": "COCO",
       "metric_name": "APS",
       "metric_variant": "APS",
-      "value": 20.5,
+      "value": 31.1,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -601,10 +601,10 @@
       "dataset": "COCO",
       "metric_name": "APM",
       "metric_variant": "APM",
-      "value": 45.8,
+      "value": 48.2,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -613,10 +613,10 @@
       "dataset": "COCO",
       "metric_name": "APL",
       "metric_variant": "APL",
-      "value": 61.1,
+      "value": 36.3,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -625,10 +625,10 @@
       "dataset": "COCO",
       "metric_name": "AP",
       "metric_variant": "AP",
-      "value": 43.3,
+      "value": 44.6,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR-DC5",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -637,10 +637,10 @@
       "dataset": "COCO",
       "metric_name": "AP50",
       "metric_variant": "AP50",
-      "value": 63.1,
+      "value": 79.8,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR-DC5",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -649,10 +649,10 @@
       "dataset": "COCO",
       "metric_name": "AP75",
       "metric_variant": "AP75",
-      "value": 45.9,
+      "value": 55.0,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR-DC5",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -661,10 +661,10 @@
       "dataset": "COCO",
       "metric_name": "APS",
       "metric_variant": "APS",
-      "value": 21.9,
+      "value": 31.9,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR-DC5",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -673,10 +673,10 @@
       "dataset": "COCO",
       "metric_name": "APM",
       "metric_variant": "APM",
-      "value": 46.2,
+      "value": 49.4,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR-DC5",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -685,10 +685,10 @@
       "dataset": "COCO",
       "metric_name": "APL",
       "metric_variant": "APL",
-      "value": 61.9,
+      "value": 37.3,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR-DC5",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -697,10 +697,10 @@
       "dataset": "COCO",
       "metric_name": "AP",
       "metric_variant": "AP",
-      "value": 44.9,
+      "value": 45.1,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR-R101",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -709,10 +709,10 @@
       "dataset": "COCO",
       "metric_name": "AP50",
       "metric_variant": "AP50",
-      "value": 64.3,
+      "value": 79.9,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR-R101",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -721,10 +721,10 @@
       "dataset": "COCO",
       "metric_name": "AP75",
       "metric_variant": "AP75",
-      "value": 47.7,
+      "value": 55.5,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR-R101",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -733,10 +733,10 @@
       "dataset": "COCO",
       "metric_name": "APS",
       "metric_variant": "APS",
-      "value": 23.7,
+      "value": 33.0,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR-R101",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -745,10 +745,10 @@
       "dataset": "COCO",
       "metric_name": "APM",
       "metric_variant": "APM",
-      "value": 49.5,
+      "value": 50.5,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR-R101",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
@@ -757,2117 +757,779 @@
       "dataset": "COCO",
       "metric_name": "APL",
       "metric_variant": "APL",
-      "value": 63.8,
+      "value": 37.0,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "DETR-R101",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
       "metric_id": "M-048",
-      "task": "object detection",
+      "task": "panoptic segmentation",
       "dataset": "COCO",
-      "metric_name": "AP",
-      "metric_variant": "AP",
-      "value": 45.4,
+      "metric_name": "PQ",
+      "metric_variant": "PQ",
+      "value": 42.4,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "PanopticFPN++ R50",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
       "metric_id": "M-049",
-      "task": "object detection",
+      "task": "panoptic segmentation",
       "dataset": "COCO",
-      "metric_name": "AP50",
-      "metric_variant": "AP50",
-      "value": 64.7,
+      "metric_name": "SQ",
+      "metric_variant": "SQ",
+      "value": 79.3,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "PanopticFPN++ R50",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
       "metric_id": "M-050",
-      "task": "object detection",
+      "task": "panoptic segmentation",
       "dataset": "COCO",
-      "metric_name": "AP75",
-      "metric_variant": "AP75",
-      "value": 48.0,
+      "metric_name": "RQ",
+      "metric_variant": "RQ",
+      "value": 51.6,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "PanopticFPN++ R50",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
       "metric_id": "M-051",
-      "task": "object detection",
+      "task": "panoptic segmentation",
       "dataset": "COCO",
-      "metric_name": "APS",
-      "metric_variant": "APS",
-      "value": 24.0,
+      "metric_name": "PQth",
+      "metric_variant": "PQth",
+      "value": 49.2,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "PanopticFPN++ R50",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
       "metric_id": "M-052",
-      "task": "object detection",
+      "task": "panoptic segmentation",
       "dataset": "COCO",
-      "metric_name": "APM",
-      "metric_variant": "APM",
-      "value": 49.0,
+      "metric_name": "SQth",
+      "metric_variant": "SQth",
+      "value": 82.4,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "PanopticFPN++ R50",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
       "metric_id": "M-053",
-      "task": "object detection",
+      "task": "panoptic segmentation",
       "dataset": "COCO",
-      "metric_name": "APL",
-      "metric_variant": "APL",
-      "value": 64.5,
+      "metric_name": "RQth",
+      "metric_variant": "RQth",
+      "value": 58.8,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "PanopticFPN++ R50",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
       "metric_id": "M-054",
-      "task": "object detection",
+      "task": "panoptic segmentation",
       "dataset": "COCO",
-      "metric_name": "AP",
-      "metric_variant": "AP",
-      "value": 46.2,
+      "metric_name": "PQst",
+      "metric_variant": "PQst",
+      "value": 32.3,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "PanopticFPN++ R50",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
       "metric_id": "M-055",
-      "task": "object detection",
+      "task": "panoptic segmentation",
       "dataset": "COCO",
-      "metric_name": "AP50",
-      "metric_variant": "AP50",
-      "value": 65.2,
+      "metric_name": "SQst",
+      "metric_variant": "SQst",
+      "value": 74.8,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "PanopticFPN++ R50",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
       "metric_id": "M-056",
-      "task": "object detection",
+      "task": "panoptic segmentation",
       "dataset": "COCO",
-      "metric_name": "AP75",
-      "metric_variant": "AP75",
-      "value": 49.0,
+      "metric_name": "RQst",
+      "metric_variant": "RQst",
+      "value": 40.6,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "PanopticFPN++ R50",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
       "metric_id": "M-057",
-      "task": "object detection",
+      "task": "panoptic segmentation",
       "dataset": "COCO",
-      "metric_name": "APS",
-      "metric_variant": "APS",
-      "value": 25.1,
+      "metric_name": "AP",
+      "metric_variant": "AP",
+      "value": 37.7,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "PanopticFPN++ R50",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
       "metric_id": "M-058",
-      "task": "object detection",
+      "task": "panoptic segmentation",
       "dataset": "COCO",
-      "metric_name": "APM",
-      "metric_variant": "APM",
-      "value": 50.0,
+      "metric_name": "PQ",
+      "metric_variant": "PQ",
+      "value": 42.5,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "UPSnet R50",
+      "source_location": "Table 7",
       "normalization_note": ""
     },
     {
       "metric_id": "M-059",
-      "task": "object detection",
+      "task": "panoptic segmentation",
       "dataset": "COCO",
-      "metric_name": "APL",
-      "metric_variant": "APL",
-      "value": 65.8,
+      "metric_name": "SQ",
+      "metric_variant": "SQ",
+      "value": 78.0,
       "direction": "higher",
-      "method_key": "Ours",
-      "source_location": "Table 1",
+      "method_key": "UPSnet R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-060",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "RQ",
+      "metric_variant": "RQ",
+      "value": 52.5,
+      "direction": "higher",
+      "method_key": "UPSnet R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-061",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "PQth",
+      "metric_variant": "PQth",
+      "value": 48.6,
+      "direction": "higher",
+      "method_key": "UPSnet R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-062",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "SQth",
+      "metric_variant": "SQth",
+      "value": 79.4,
+      "direction": "higher",
+      "method_key": "UPSnet R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-063",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "RQth",
+      "metric_variant": "RQth",
+      "value": 59.6,
+      "direction": "higher",
+      "method_key": "UPSnet R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-064",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "PQst",
+      "metric_variant": "PQst",
+      "value": 33.4,
+      "direction": "higher",
+      "method_key": "UPSnet R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-065",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "SQst",
+      "metric_variant": "SQst",
+      "value": 75.9,
+      "direction": "higher",
+      "method_key": "UPSnet R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-066",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "RQst",
+      "metric_variant": "RQst",
+      "value": 41.7,
+      "direction": "higher",
+      "method_key": "UPSnet R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-067",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "AP",
+      "metric_variant": "AP",
+      "value": 34.3,
+      "direction": "higher",
+      "method_key": "UPSnet R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-068",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "PQ",
+      "metric_variant": "PQ",
+      "value": 43.0,
+      "direction": "higher",
+      "method_key": "UPSnet-M R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-069",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "SQ",
+      "metric_variant": "SQ",
+      "value": 79.1,
+      "direction": "higher",
+      "method_key": "UPSnet-M R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-070",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "RQ",
+      "metric_variant": "RQ",
+      "value": 52.8,
+      "direction": "higher",
+      "method_key": "UPSnet-M R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-071",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "PQth",
+      "metric_variant": "PQth",
+      "value": 48.9,
+      "direction": "higher",
+      "method_key": "UPSnet-M R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-072",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "SQth",
+      "metric_variant": "SQth",
+      "value": 79.7,
+      "direction": "higher",
+      "method_key": "UPSnet-M R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-073",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "RQth",
+      "metric_variant": "RQth",
+      "value": 59.7,
+      "direction": "higher",
+      "method_key": "UPSnet-M R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-074",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "PQst",
+      "metric_variant": "PQst",
+      "value": 34.1,
+      "direction": "higher",
+      "method_key": "UPSnet-M R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-075",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "SQst",
+      "metric_variant": "SQst",
+      "value": 78.2,
+      "direction": "higher",
+      "method_key": "UPSnet-M R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-076",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "RQst",
+      "metric_variant": "RQst",
+      "value": 42.3,
+      "direction": "higher",
+      "method_key": "UPSnet-M R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-077",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "AP",
+      "metric_variant": "AP",
+      "value": 34.3,
+      "direction": "higher",
+      "method_key": "UPSnet-M R50",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-078",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "PQ",
+      "metric_variant": "PQ",
+      "value": 44.1,
+      "direction": "higher",
+      "method_key": "PanopticFPN++ R101",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-079",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "SQ",
+      "metric_variant": "SQ",
+      "value": 79.5,
+      "direction": "higher",
+      "method_key": "PanopticFPN++ R101",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-080",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "RQ",
+      "metric_variant": "RQ",
+      "value": 53.3,
+      "direction": "higher",
+      "method_key": "PanopticFPN++ R101",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-081",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "PQth",
+      "metric_variant": "PQth",
+      "value": 51.0,
+      "direction": "higher",
+      "method_key": "PanopticFPN++ R101",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-082",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "SQth",
+      "metric_variant": "SQth",
+      "value": 83.2,
+      "direction": "higher",
+      "method_key": "PanopticFPN++ R101",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-083",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "RQth",
+      "metric_variant": "RQth",
+      "value": 60.6,
+      "direction": "higher",
+      "method_key": "PanopticFPN++ R101",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-084",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "PQst",
+      "metric_variant": "PQst",
+      "value": 33.6,
+      "direction": "higher",
+      "method_key": "PanopticFPN++ R101",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-085",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "SQst",
+      "metric_variant": "SQst",
+      "value": 74.0,
+      "direction": "higher",
+      "method_key": "PanopticFPN++ R101",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-086",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "RQst",
+      "metric_variant": "RQst",
+      "value": 42.1,
+      "direction": "higher",
+      "method_key": "PanopticFPN++ R101",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-087",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "AP",
+      "metric_variant": "AP",
+      "value": 39.7,
+      "direction": "higher",
+      "method_key": "PanopticFPN++ R101",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-088",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "PQ",
+      "metric_variant": "PQ",
+      "value": 43.4,
+      "direction": "higher",
+      "method_key": "DETR",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-089",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "SQ",
+      "metric_variant": "SQ",
+      "value": 79.3,
+      "direction": "higher",
+      "method_key": "DETR",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-090",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "RQ",
+      "metric_variant": "RQ",
+      "value": 53.8,
+      "direction": "higher",
+      "method_key": "DETR",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-091",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "PQth",
+      "metric_variant": "PQth",
+      "value": 48.2,
+      "direction": "higher",
+      "method_key": "DETR",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-092",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "SQth",
+      "metric_variant": "SQth",
+      "value": 79.8,
+      "direction": "higher",
+      "method_key": "DETR",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-093",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "RQth",
+      "metric_variant": "RQth",
+      "value": 59.5,
+      "direction": "higher",
+      "method_key": "DETR",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-094",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "PQst",
+      "metric_variant": "PQst",
+      "value": 36.3,
+      "direction": "higher",
+      "method_key": "DETR",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-095",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "SQst",
+      "metric_variant": "SQst",
+      "value": 78.5,
+      "direction": "higher",
+      "method_key": "DETR",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-096",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "RQst",
+      "metric_variant": "RQst",
+      "value": 45.3,
+      "direction": "higher",
+      "method_key": "DETR",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-097",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "AP",
+      "metric_variant": "AP",
+      "value": 31.1,
+      "direction": "higher",
+      "method_key": "DETR",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-098",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "PQ",
+      "metric_variant": "PQ",
+      "value": 44.6,
+      "direction": "higher",
+      "method_key": "DETR-DC5",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-099",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "SQ",
+      "metric_variant": "SQ",
+      "value": 79.8,
+      "direction": "higher",
+      "method_key": "DETR-DC5",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-100",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "RQ",
+      "metric_variant": "RQ",
+      "value": 55.0,
+      "direction": "higher",
+      "method_key": "DETR-DC5",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-101",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "PQth",
+      "metric_variant": "PQth",
+      "value": 49.4,
+      "direction": "higher",
+      "method_key": "DETR-DC5",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-102",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "SQth",
+      "metric_variant": "SQth",
+      "value": 80.5,
+      "direction": "higher",
+      "method_key": "DETR-DC5",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-103",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "RQth",
+      "metric_variant": "RQth",
+      "value": 60.6,
+      "direction": "higher",
+      "method_key": "DETR-DC5",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-104",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "PQst",
+      "metric_variant": "PQst",
+      "value": 37.3,
+      "direction": "higher",
+      "method_key": "DETR-DC5",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-105",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "SQst",
+      "metric_variant": "SQst",
+      "value": 78.7,
+      "direction": "higher",
+      "method_key": "DETR-DC5",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-106",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "RQst",
+      "metric_variant": "RQst",
+      "value": 46.5,
+      "direction": "higher",
+      "method_key": "DETR-DC5",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-107",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "AP",
+      "metric_variant": "AP",
+      "value": 31.9,
+      "direction": "higher",
+      "method_key": "DETR-DC5",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-108",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "PQ",
+      "metric_variant": "PQ",
+      "value": 45.1,
+      "direction": "higher",
+      "method_key": "DETR-R101",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-109",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "SQ",
+      "metric_variant": "SQ",
+      "value": 79.9,
+      "direction": "higher",
+      "method_key": "DETR-R101",
+      "source_location": "Table 7",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-110",
+      "task": "panoptic segmentation",
+      "dataset": "COCO",
+      "metric_name": "RQ",
+      "metric_variant": "RQ",
+      "value": 55.5,
+      "direction": "higher",
+      "method_key": "DETR-R101",
+      "source_location": "Table 7",
       "normalization_note": ""
     }
   ],
   "comparisons": [
     {
       "comparison_id": "CMP-001",
-      "metric_ids": [
-        "M-030",
-        "M-000"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +3.00 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-002",
-      "metric_ids": [
-        "M-030",
-        "M-006"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +1.80 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-003",
-      "metric_ids": [
-        "M-030",
-        "M-012"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +0.00 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-004",
-      "metric_ids": [
-        "M-030",
-        "M-018"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +0.90 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-005",
-      "metric_ids": [
-        "M-030",
-        "M-024"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +0.00 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-006",
-      "metric_ids": [
-        "M-036",
-        "M-000"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +4.30 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-007",
-      "metric_ids": [
-        "M-036",
-        "M-006"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +3.10 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-008",
-      "metric_ids": [
-        "M-036",
-        "M-012"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +1.30 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-009",
-      "metric_ids": [
-        "M-036",
-        "M-018"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +2.20 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-010",
-      "metric_ids": [
-        "M-036",
-        "M-024"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +1.30 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-011",
-      "metric_ids": [
-        "M-042",
-        "M-000"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +5.90 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-012",
-      "metric_ids": [
-        "M-042",
-        "M-006"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +4.70 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-013",
-      "metric_ids": [
-        "M-042",
-        "M-012"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +2.90 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-014",
-      "metric_ids": [
-        "M-042",
-        "M-018"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +3.80 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-015",
-      "metric_ids": [
-        "M-042",
-        "M-024"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +2.90 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-016",
-      "metric_ids": [
-        "M-048",
-        "M-000"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +6.40 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-017",
-      "metric_ids": [
-        "M-048",
-        "M-006"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +5.20 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-018",
-      "metric_ids": [
-        "M-048",
-        "M-012"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +3.40 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-019",
-      "metric_ids": [
-        "M-048",
-        "M-018"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +4.30 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-020",
-      "metric_ids": [
-        "M-048",
-        "M-024"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +3.40 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-021",
-      "metric_ids": [
-        "M-054",
-        "M-000"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +7.20 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-022",
-      "metric_ids": [
-        "M-054",
-        "M-006"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +6.00 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-023",
-      "metric_ids": [
-        "M-054",
-        "M-012"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +4.20 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-024",
-      "metric_ids": [
-        "M-054",
-        "M-018"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +5.10 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-025",
-      "metric_ids": [
-        "M-054",
-        "M-024"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP +4.20 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-026",
-      "metric_ids": [
-        "M-031",
-        "M-001"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +1.90 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-027",
-      "metric_ids": [
-        "M-031",
-        "M-007"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +1.40 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-028",
-      "metric_ids": [
-        "M-031",
-        "M-013"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 -0.10 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-029",
-      "metric_ids": [
-        "M-031",
-        "M-019"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +1.00 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-030",
-      "metric_ids": [
-        "M-031",
-        "M-025"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +0.30 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-031",
-      "metric_ids": [
-        "M-037",
-        "M-001"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +2.60 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-032",
-      "metric_ids": [
-        "M-037",
-        "M-007"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +2.10 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-033",
-      "metric_ids": [
-        "M-037",
-        "M-013"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +0.60 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-034",
-      "metric_ids": [
-        "M-037",
-        "M-019"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +1.70 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-035",
-      "metric_ids": [
-        "M-037",
-        "M-025"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +1.00 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-036",
-      "metric_ids": [
-        "M-043",
-        "M-001"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +3.80 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-037",
-      "metric_ids": [
-        "M-043",
-        "M-007"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +3.30 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-038",
-      "metric_ids": [
-        "M-043",
-        "M-013"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +1.80 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-039",
-      "metric_ids": [
-        "M-043",
-        "M-019"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +2.90 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-040",
-      "metric_ids": [
-        "M-043",
-        "M-025"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +2.20 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-041",
-      "metric_ids": [
-        "M-049",
-        "M-001"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +4.20 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-042",
-      "metric_ids": [
-        "M-049",
-        "M-007"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +3.70 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-043",
-      "metric_ids": [
-        "M-049",
-        "M-013"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +2.20 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-044",
-      "metric_ids": [
-        "M-049",
-        "M-019"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +3.30 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-045",
-      "metric_ids": [
-        "M-049",
-        "M-025"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +2.60 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-046",
-      "metric_ids": [
-        "M-055",
-        "M-001"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +4.70 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-047",
-      "metric_ids": [
-        "M-055",
-        "M-007"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +4.20 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-048",
-      "metric_ids": [
-        "M-055",
-        "M-013"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +2.70 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-049",
-      "metric_ids": [
-        "M-055",
-        "M-019"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +3.80 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-050",
-      "metric_ids": [
-        "M-055",
-        "M-025"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP50 +3.10 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-051",
-      "metric_ids": [
-        "M-032",
-        "M-002"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +1.90 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-052",
-      "metric_ids": [
-        "M-032",
-        "M-008"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +0.40 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-053",
-      "metric_ids": [
-        "M-032",
-        "M-014"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 -1.70 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-054",
-      "metric_ids": [
-        "M-032",
-        "M-020"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 -0.10 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-055",
-      "metric_ids": [
-        "M-032",
-        "M-026"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 -1.30 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-056",
-      "metric_ids": [
-        "M-038",
-        "M-002"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +3.60 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-057",
-      "metric_ids": [
-        "M-038",
-        "M-008"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +2.10 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-058",
-      "metric_ids": [
-        "M-038",
-        "M-014"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +0.00 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-059",
-      "metric_ids": [
-        "M-038",
-        "M-020"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +1.60 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-060",
-      "metric_ids": [
-        "M-038",
-        "M-026"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +0.40 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-061",
-      "metric_ids": [
-        "M-044",
-        "M-002"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +5.40 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-062",
-      "metric_ids": [
-        "M-044",
-        "M-008"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +3.90 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-063",
-      "metric_ids": [
-        "M-044",
-        "M-014"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +1.80 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-064",
-      "metric_ids": [
-        "M-044",
-        "M-020"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +3.40 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-065",
-      "metric_ids": [
-        "M-044",
-        "M-026"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +2.20 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-066",
-      "metric_ids": [
-        "M-050",
-        "M-002"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +5.70 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-067",
-      "metric_ids": [
-        "M-050",
-        "M-008"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +4.20 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-068",
-      "metric_ids": [
-        "M-050",
-        "M-014"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +2.10 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-069",
-      "metric_ids": [
-        "M-050",
-        "M-020"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +3.70 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-070",
-      "metric_ids": [
-        "M-050",
-        "M-026"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +2.50 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-071",
-      "metric_ids": [
-        "M-056",
-        "M-002"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +6.70 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-072",
-      "metric_ids": [
-        "M-056",
-        "M-008"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +5.20 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-073",
-      "metric_ids": [
-        "M-056",
-        "M-014"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +3.10 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-074",
-      "metric_ids": [
-        "M-056",
-        "M-020"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +4.70 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-075",
-      "metric_ids": [
-        "M-056",
-        "M-026"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "AP75 +3.50 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-076",
-      "metric_ids": [
-        "M-035",
-        "M-005"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +8.60 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-077",
-      "metric_ids": [
-        "M-035",
-        "M-011"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +9.10 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-078",
-      "metric_ids": [
-        "M-035",
-        "M-017"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +6.50 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-079",
-      "metric_ids": [
-        "M-035",
-        "M-023"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +6.10 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-080",
-      "metric_ids": [
-        "M-035",
-        "M-029"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +6.50 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-081",
-      "metric_ids": [
-        "M-041",
-        "M-005"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +9.40 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-082",
-      "metric_ids": [
-        "M-041",
-        "M-011"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +9.90 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-083",
-      "metric_ids": [
-        "M-041",
-        "M-017"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +7.30 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-084",
-      "metric_ids": [
-        "M-041",
-        "M-023"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +6.90 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-085",
-      "metric_ids": [
-        "M-041",
-        "M-029"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +7.30 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-086",
-      "metric_ids": [
-        "M-047",
-        "M-005"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +11.30 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-087",
-      "metric_ids": [
-        "M-047",
-        "M-011"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +11.80 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-088",
-      "metric_ids": [
-        "M-047",
-        "M-017"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +9.20 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-089",
-      "metric_ids": [
-        "M-047",
-        "M-023"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +8.80 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-090",
-      "metric_ids": [
-        "M-047",
-        "M-029"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +9.20 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-091",
-      "metric_ids": [
-        "M-053",
-        "M-005"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +12.00 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-092",
-      "metric_ids": [
-        "M-053",
-        "M-011"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +12.50 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-093",
-      "metric_ids": [
-        "M-053",
-        "M-017"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +9.90 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-094",
-      "metric_ids": [
-        "M-053",
-        "M-023"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +9.50 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-095",
-      "metric_ids": [
-        "M-053",
-        "M-029"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +9.90 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-096",
-      "metric_ids": [
-        "M-059",
-        "M-005"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +13.30 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-097",
-      "metric_ids": [
-        "M-059",
-        "M-011"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +13.80 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-098",
-      "metric_ids": [
-        "M-059",
-        "M-017"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +11.20 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-099",
-      "metric_ids": [
-        "M-059",
-        "M-023"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +10.80 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-100",
-      "metric_ids": [
-        "M-059",
-        "M-029"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APL +11.20 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-101",
-      "metric_ids": [
-        "M-034",
-        "M-004"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +2.30 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-102",
-      "metric_ids": [
-        "M-034",
-        "M-010"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +2.30 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-103",
-      "metric_ids": [
-        "M-034",
-        "M-016"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +0.20 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-104",
-      "metric_ids": [
-        "M-034",
-        "M-022"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM -0.10 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-105",
-      "metric_ids": [
-        "M-034",
-        "M-028"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM -0.10 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-106",
-      "metric_ids": [
-        "M-040",
-        "M-004"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +2.70 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-107",
-      "metric_ids": [
-        "M-040",
-        "M-010"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +2.70 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-108",
-      "metric_ids": [
-        "M-040",
-        "M-016"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +0.60 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-109",
-      "metric_ids": [
-        "M-040",
-        "M-022"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +0.30 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-110",
-      "metric_ids": [
-        "M-040",
-        "M-028"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +0.30 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-111",
-      "metric_ids": [
-        "M-046",
-        "M-004"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +6.00 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-112",
-      "metric_ids": [
-        "M-046",
-        "M-010"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +6.00 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-113",
-      "metric_ids": [
-        "M-046",
-        "M-016"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +3.90 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-114",
-      "metric_ids": [
-        "M-046",
-        "M-022"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +3.60 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-115",
-      "metric_ids": [
-        "M-046",
-        "M-028"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +3.60 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-116",
-      "metric_ids": [
-        "M-052",
-        "M-004"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +5.50 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-117",
-      "metric_ids": [
-        "M-052",
-        "M-010"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +5.50 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-118",
-      "metric_ids": [
-        "M-052",
-        "M-016"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +3.40 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-119",
-      "metric_ids": [
-        "M-052",
-        "M-022"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +3.10 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-120",
-      "metric_ids": [
-        "M-052",
-        "M-028"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +3.10 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-121",
-      "metric_ids": [
-        "M-058",
-        "M-004"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +6.50 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-122",
-      "metric_ids": [
-        "M-058",
-        "M-010"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +6.50 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-123",
-      "metric_ids": [
-        "M-058",
-        "M-016"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +4.40 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-124",
-      "metric_ids": [
-        "M-058",
-        "M-022"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +4.10 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-125",
-      "metric_ids": [
-        "M-058",
-        "M-028"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APM +4.10 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-126",
-      "metric_ids": [
-        "M-033",
-        "M-003"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -0.90 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-127",
-      "metric_ids": [
-        "M-033",
-        "M-009"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -3.70 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-128",
-      "metric_ids": [
-        "M-033",
-        "M-015"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -4.70 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-129",
-      "metric_ids": [
-        "M-033",
-        "M-021"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -2.40 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-130",
-      "metric_ids": [
-        "M-033",
-        "M-027"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -6.10 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-131",
-      "metric_ids": [
-        "M-039",
-        "M-003"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS +0.50 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-132",
-      "metric_ids": [
-        "M-039",
-        "M-009"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -2.30 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-133",
-      "metric_ids": [
-        "M-039",
-        "M-015"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -3.30 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-134",
-      "metric_ids": [
-        "M-039",
-        "M-021"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -1.00 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-135",
-      "metric_ids": [
-        "M-039",
-        "M-027"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -4.70 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-136",
-      "metric_ids": [
-        "M-045",
-        "M-003"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS +2.30 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-137",
-      "metric_ids": [
-        "M-045",
-        "M-009"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -0.50 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-138",
-      "metric_ids": [
-        "M-045",
-        "M-015"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -1.50 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-139",
-      "metric_ids": [
-        "M-045",
-        "M-021"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS +0.80 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-140",
-      "metric_ids": [
-        "M-045",
-        "M-027"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -2.90 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-141",
-      "metric_ids": [
-        "M-051",
-        "M-003"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS +2.60 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-142",
-      "metric_ids": [
-        "M-051",
-        "M-009"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -0.20 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-143",
-      "metric_ids": [
-        "M-051",
-        "M-015"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -1.20 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-144",
-      "metric_ids": [
-        "M-051",
-        "M-021"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS +1.10 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-145",
-      "metric_ids": [
-        "M-051",
-        "M-027"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -2.60 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-146",
-      "metric_ids": [
-        "M-057",
-        "M-003"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS +3.70 vs Faster RCNN-DC5 (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-147",
-      "metric_ids": [
-        "M-057",
-        "M-009"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS +0.90 vs Faster RCNN-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-148",
-      "metric_ids": [
-        "M-057",
-        "M-015"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -0.10 vs Faster RCNN-R101-FPN (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-149",
-      "metric_ids": [
-        "M-057",
-        "M-021"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS +2.20 vs Faster RCNN-DC5+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-150",
-      "metric_ids": [
-        "M-057",
-        "M-027"
-      ],
-      "type": "vs_baseline",
-      "conclusion": "APS -1.50 vs Faster RCNN-FPN+ (COCO)",
-      "evidence_locations": [
-        "Table 1",
-        "Table 1"
-      ]
-    },
-    {
-      "comparison_id": "CMP-151",
       "metric_ids": [],
       "type": "coverage",
       "conclusion": "covers 1 datasets: COCO",
       "evidence_locations": []
     },
     {
-      "comparison_id": "CMP-152",
+      "comparison_id": "CMP-002",
       "metric_ids": [
         "M-000",
         "M-001",
@@ -2928,7 +1590,58 @@
         "M-056",
         "M-057",
         "M-058",
-        "M-059"
+        "M-059",
+        "M-060",
+        "M-061",
+        "M-062",
+        "M-063",
+        "M-064",
+        "M-065",
+        "M-066",
+        "M-067",
+        "M-068",
+        "M-069",
+        "M-070",
+        "M-071",
+        "M-072",
+        "M-073",
+        "M-074",
+        "M-075",
+        "M-076",
+        "M-077",
+        "M-078",
+        "M-079",
+        "M-080",
+        "M-081",
+        "M-082",
+        "M-083",
+        "M-084",
+        "M-085",
+        "M-086",
+        "M-087",
+        "M-088",
+        "M-089",
+        "M-090",
+        "M-091",
+        "M-092",
+        "M-093",
+        "M-094",
+        "M-095",
+        "M-096",
+        "M-097",
+        "M-098",
+        "M-099",
+        "M-100",
+        "M-101",
+        "M-102",
+        "M-103",
+        "M-104",
+        "M-105",
+        "M-106",
+        "M-107",
+        "M-108",
+        "M-109",
+        "M-110"
       ],
       "type": "statistics",
       "conclusion": "no variance/std disclosure detected",
@@ -2943,10 +1656,8 @@
       "confidence": "high",
       "evidence": [
         "We present a new method that views object detection as a direct set prediction problem.",
-        "Our approach streamlines the detection pipeline, effectively removing the need for many hand-designed components like a non-maximum suppression procedure or anchor generation that explicitly encode our prior knowledge about the task.",
         "The main ingredients of the new framework, called DEtection TRansformer or DETR, are a set-based global loss that forces unique predictions via bipartite matching, and a transformer encoder-decoder architecture.",
-        "Compared to most previous work on direct set prediction, the main features of DETR are the conjunction of the bipartite matching loss and transformers with (non-autoregressive) parallel decoding.",
-        "In contrast, previous work focused on autoregressive decoding with RNNs."
+        "Compared to most previous work on direct set prediction, the main features of DETR are the conjunction of the bipartite matching loss and transformers with (non-autoregressive) parallel decoding."
       ],
       "status": "evaluated"
     },
@@ -2956,79 +1667,29 @@
       "score": 5.0,
       "confidence": "high",
       "evidence": [
-        "The main ingredients of the new framework, called DEtection TRansformer or DETR, are a set-based global loss that forces unique predictions via bipartite matching, and a transformer encoder-decoder architecture.",
-        "Given a fixed small set of learned object queries, DETR reasons about the relations of the objects and the global image context to directly output the final set of predictions in parallel.",
-        "The new model is conceptually simple and does not require a specialized library, unlike many other modern detectors.",
-        "The design ethos of DETR easily extend to more complex tasks."
+        "Our approach streamlines the detection pipeline, effectively removing the need for many hand-designed components like a non-maximum suppression procedure or anchor generation that explicitly encode our prior knowledge about the task.",
+        "In our experiments, we show that a simple segmentation head trained on top of a pre-trained DETR outperfoms competitive baselines on Panoptic Segmentation."
       ],
       "status": "evaluated"
     },
     {
       "cluster_id": "CL-004",
       "dimension": "技术稳健性",
-      "score": 4.0,
-      "confidence": "high",
+      "score": 3.0,
+      "confidence": "medium",
       "evidence": [
-        "AP +3.00 vs Faster RCNN-DC5 (COCO)",
-        "AP +1.80 vs Faster RCNN-FPN (COCO)",
-        "AP +0.00 vs Faster RCNN-R101-FPN (COCO)",
-        "AP +0.90 vs Faster RCNN-DC5+ (COCO)",
-        "AP +0.00 vs Faster RCNN-FPN+ (COCO)",
-        "AP +4.30 vs Faster RCNN-DC5 (COCO)",
-        "AP +3.10 vs Faster RCNN-FPN (COCO)",
-        "AP +1.30 vs Faster RCNN-R101-FPN (COCO)",
-        "AP +2.20 vs Faster RCNN-DC5+ (COCO)",
-        "AP +1.30 vs Faster RCNN-FPN+ (COCO)",
-        "AP +5.90 vs Faster RCNN-DC5 (COCO)",
-        "AP +4.70 vs Faster RCNN-FPN (COCO)",
-        "AP +2.90 vs Faster RCNN-R101-FPN (COCO)",
-        "AP +3.80 vs Faster RCNN-DC5+ (COCO)",
-        "AP +2.90 vs Faster RCNN-FPN+ (COCO)",
-        "AP +6.40 vs Faster RCNN-DC5 (COCO)",
-        "AP +5.20 vs Faster RCNN-FPN (COCO)",
-        "AP +3.40 vs Faster RCNN-R101-FPN (COCO)",
-        "AP +4.30 vs Faster RCNN-DC5+ (COCO)",
-        "AP +3.40 vs Faster RCNN-FPN+ (COCO)",
-        "AP +7.20 vs Faster RCNN-DC5 (COCO)",
-        "AP +6.00 vs Faster RCNN-FPN (COCO)",
-        "AP +4.20 vs Faster RCNN-R101-FPN (COCO)",
-        "AP +5.10 vs Faster RCNN-DC5+ (COCO)",
-        "AP +4.20 vs Faster RCNN-FPN+ (COCO)",
-        "It obtains, however, lower performances on small objects."
+        "It obtains, however, lower performances on small objects.",
+        "covers 1 datasets: COCO"
       ],
       "status": "evaluated"
     },
     {
       "cluster_id": "CL-005",
       "dimension": "声明-证据一致性",
-      "score": 5.0,
+      "score": 4.0,
       "confidence": "high",
       "evidence": [
-        "AP +3.00 vs Faster RCNN-DC5 (COCO)",
-        "AP +1.80 vs Faster RCNN-FPN (COCO)",
-        "AP +0.00 vs Faster RCNN-R101-FPN (COCO)",
-        "AP +0.90 vs Faster RCNN-DC5+ (COCO)",
-        "AP +0.00 vs Faster RCNN-FPN+ (COCO)",
-        "AP +4.30 vs Faster RCNN-DC5 (COCO)",
-        "AP +3.10 vs Faster RCNN-FPN (COCO)",
-        "AP +1.30 vs Faster RCNN-R101-FPN (COCO)",
-        "AP +2.20 vs Faster RCNN-DC5+ (COCO)",
-        "AP +1.30 vs Faster RCNN-FPN+ (COCO)",
-        "AP +5.90 vs Faster RCNN-DC5 (COCO)",
-        "AP +4.70 vs Faster RCNN-FPN (COCO)",
-        "AP +2.90 vs Faster RCNN-R101-FPN (COCO)",
-        "AP +3.80 vs Faster RCNN-DC5+ (COCO)",
-        "AP +2.90 vs Faster RCNN-FPN+ (COCO)",
-        "AP +6.40 vs Faster RCNN-DC5 (COCO)",
-        "AP +5.20 vs Faster RCNN-FPN (COCO)",
-        "AP +3.40 vs Faster RCNN-R101-FPN (COCO)",
-        "AP +4.30 vs Faster RCNN-DC5+ (COCO)",
-        "AP +3.40 vs Faster RCNN-FPN+ (COCO)",
-        "AP +7.20 vs Faster RCNN-DC5 (COCO)",
-        "AP +6.00 vs Faster RCNN-FPN (COCO)",
-        "AP +4.20 vs Faster RCNN-R101-FPN (COCO)",
-        "AP +5.10 vs Faster RCNN-DC5+ (COCO)",
-        "AP +4.20 vs Faster RCNN-FPN+ (COCO)",
+        "In our experiments, we show that a simple segmentation head trained on top of a pre-trained DETR outperfoms competitive baselines on Panoptic Segmentation.",
         "It obtains, however, lower performances on small objects."
       ],
       "status": "evaluated"
@@ -3039,42 +1700,18 @@
       "score": 4.0,
       "confidence": "high",
       "evidence": [
-        "AP +3.00 vs Faster RCNN-DC5 (COCO)",
-        "AP +1.80 vs Faster RCNN-FPN (COCO)",
-        "AP +0.00 vs Faster RCNN-R101-FPN (COCO)",
-        "AP +0.90 vs Faster RCNN-DC5+ (COCO)",
-        "AP +0.00 vs Faster RCNN-FPN+ (COCO)",
-        "AP +4.30 vs Faster RCNN-DC5 (COCO)",
-        "AP +3.10 vs Faster RCNN-FPN (COCO)",
-        "AP +1.30 vs Faster RCNN-R101-FPN (COCO)",
-        "AP +2.20 vs Faster RCNN-DC5+ (COCO)",
-        "AP +1.30 vs Faster RCNN-FPN+ (COCO)",
-        "AP +5.90 vs Faster RCNN-DC5 (COCO)",
-        "AP +4.70 vs Faster RCNN-FPN (COCO)",
-        "AP +2.90 vs Faster RCNN-R101-FPN (COCO)",
-        "AP +3.80 vs Faster RCNN-DC5+ (COCO)",
-        "AP +2.90 vs Faster RCNN-FPN+ (COCO)",
-        "AP +6.40 vs Faster RCNN-DC5 (COCO)",
-        "AP +5.20 vs Faster RCNN-FPN (COCO)",
-        "AP +3.40 vs Faster RCNN-R101-FPN (COCO)",
-        "AP +4.30 vs Faster RCNN-DC5+ (COCO)",
-        "AP +3.40 vs Faster RCNN-FPN+ (COCO)",
-        "AP +7.20 vs Faster RCNN-DC5 (COCO)",
-        "AP +6.00 vs Faster RCNN-FPN (COCO)",
-        "AP +4.20 vs Faster RCNN-R101-FPN (COCO)",
-        "AP +5.10 vs Faster RCNN-DC5+ (COCO)",
-        "AP +4.20 vs Faster RCNN-FPN+ (COCO)",
-        "The new model requires extra-long training schedule and benefits from auxiliary decoding losses in the transformer."
+        "Training settings for DETR differ from standard object detectors in multiple ways. The new model requires extra-long training schedule and benefits from auxiliary decoding losses in the transformer."
       ],
       "status": "evaluated"
     },
     {
       "cluster_id": "CL-007",
       "dimension": "泛化性与部署稳健性",
-      "score": 2.0,
+      "score": 3.0,
       "confidence": "high",
       "evidence": [
-        "covers 1 datasets: COCO"
+        "covers 1 datasets: COCO",
+        "In our experiments, we show that a simple segmentation head trained on top of a pre-trained DETR outperfoms competitive baselines on Panoptic Segmentation."
       ],
       "status": "evaluated"
     },
@@ -3106,9 +1743,7 @@
       "score": 5.0,
       "confidence": "high",
       "evidence": [
-        "Training code and pretrained models are available at https://github.com/facebookresearch/detr.",
-        "Unlike most existing detection methods, DETR doesn’t require any customized layers, and thus can be reproduced easily in any framework that contains standard CNN and transformer classes.",
-        "Inference code for DETR can be implemented in less than 50 lines in PyTorch."
+        "Training code and pretrained models are available at https://github.com/facebookresearch/detr."
       ],
       "status": "evaluated"
     },
@@ -3117,7 +1752,9 @@
       "dimension": "数据集贡献",
       "score": 0.0,
       "confidence": "high",
-      "evidence": [],
+      "evidence": [
+        "covers 1 datasets: COCO"
+      ],
       "status": "evaluated"
     },
     {
@@ -3128,8 +1765,7 @@
       "evidence": [
         "The overall DETR architecture is surprisingly simple and depicted in Figure 2.",
         "It contains three main components, which we describe below: a CNN backbone to extract a compact feature representation, an encoder-decoder transformer, and a simple feed forward network (FFN) that makes the final detection prediction.",
-        "Unlike many modern detectors, DETR can be implemented in any deep learning framework that provides a common CNN backbone and a transformer architecture implementation with just a few hundred lines.",
-        "We hope that the simplicity of our method will attract new researchers to the detection community."
+        "Unlike many modern detectors, DETR can be implemented in any deep learning framework that provides a common CNN backbone and a transformer architecture implementation with just a few hundred lines."
       ],
       "status": "evaluated"
     },
@@ -3140,40 +1776,8 @@
       "confidence": "high",
       "evidence": [
         "Our work build on prior work in several domains: bipartite matching losses for set prediction, encoder-decoder architectures based on the transformer, parallel decoding, and object detection methods.",
-        "There is no canonical deep learning model to directly predict sets.",
-        "The basic set prediction task is multilabel classification (see e.g., [40,33] for references in the context of computer vision) for which the baseline approach, one-vs-rest, does not apply to problems such as detection where there is an underlying structure between elements (i.e., near-identical boxes).",
-        "The first difficulty in these tasks is to avoid near-duplicates.",
-        "Most current detectors use postprocessings such as non-maximal suppression to address this issue, but direct set prediction are postprocessing-free.",
-        "They need global inference schemes that model interactions between all predicted elements to avoid redundancy.",
-        "For constant-size set prediction, dense fully connected networks [9] are sufficient but costly.",
-        "A general approach is to use auto-regressive sequence models such as recurrent neural networks [48].",
-        "In all cases, the loss function should be invariant by a permutation of the predictions.",
-        "The usual solution is to design a loss based on the Hungarian algorithm [20], to find a bipartite matching between ground-truth and prediction.",
-        "This enforces permutation-invariance, and guarantees that each target element has a unique match.",
-        "We follow the bipartite matching loss approach.",
-        "In contrast to most prior work however, we step away from autoregressive models and use transformers with parallel decoding, which we describe below.",
-        "Transformers were introduced by Vaswani et al. [47] as a new attention-based building block for machine translation.",
-        "Attention mechanisms [2] are neural network layers that aggregate information from the entire input sequence.",
-        "Transformers introduced self-attention layers, which, similarly to Non-Local Neural Networks [49], scan through each element of a sequence and update it by aggregating information from the whole sequence.",
-        "One of the main advantages of attention-based models is their global computations and perfect memory, which makes them more suitable than RNNs on long sequences.",
-        "Transformers are now replacing RNNs in many problems in natural language processing, speech processing and computer vision [8,27,45,34,31].",
-        "Transformers were first used in auto-regressive models, following early sequence-to-sequence models [44], generating output tokens one by one.",
-        "However, the prohibitive inference cost (proportional to output length, and hard to batch) lead to the development of parallel sequence generation, in the domains of audio [29], machine translation [12,10], word representation learning [8], and more recently speech recognition [6].",
-        "We also combine transformers and parallel decoding for their suitable trade-off between computational cost and the ability to perform the global computations required for set prediction.",
-        "Most modern object detection methods make predictions relative to some initial guesses.",
-        "Two-stage detectors [37,5] predict boxes w.r.t. proposals, whereas single-stage methods make predictions w.r.t. anchors [23] or a grid of possible object centers [53,46].",
-        "Recent work [52] demonstrate that the final performance of these systems heavily depends on the exact way these initial guesses are set.",
-        "In our model we are able to remove this hand-crafted process and streamline the detection process by directly predicting the set of detections with absolute box prediction w.r.t. the input image rather than an anchor.",
-        "Set-based loss. Several object detectors [9,25,35] used the bipartite matching loss.",
-        "However, in these early deep learning models, the relation between different prediction was modeled with convolutional or fully-connected layers only and a hand-designed NMS post-processing can improve their performance.",
-        "More recent detectors [37,23,53] use non-unique assignment rules between ground truth and predictions together with an NMS.",
-        "Learnable NMS methods [16,4] and relation networks [17] explicitly model relations between different predictions with attention.",
-        "Using direct set losses, they do not require any post-processing steps.",
-        "However, these methods employ additional hand-crafted context features like proposal box coordinates to model relations between detections efficiently, while we look for solutions that reduce the prior knowledge encoded in the model.",
-        "Recurrent detectors. Closest to our approach are end-to-end set predictions for object detection [43] and instance segmentation [41,30,36,42].",
-        "Similarly to us, they use bipartite-matching losses with encoder-decoder architectures based on CNN activations to directly produce a set of bounding boxes.",
-        "These approaches, however, were only evaluated on small datasets and not against modern baselines.",
-        "In particular, they are based on autoregressive models (more precisely RNNs), so they do not leverage the recent transformers with parallel decoding."
+        "Transformers were introduced by Vaswani et al. as a new attention-based building block for machine translation.",
+        "Most modern object detection methods make predictions relative to some initial guesses."
       ],
       "status": "evaluated"
     },
@@ -3193,7 +1797,7 @@
       "evidence": [
         "It obtains, however, lower performances on small objects.",
         "We expect that future work will improve this aspect in the same way the development of FPN did for Faster R-CNN.",
-        "The new model requires extra-long training schedule and benefits from auxiliary decoding losses in the transformer."
+        "Training settings for DETR differ from standard object detectors in multiple ways. The new model requires extra-long training schedule and benefits from auxiliary decoding losses in the transformer."
       ],
       "status": "evaluated"
     },
@@ -3279,7 +1883,7 @@
     }
   ],
   "summary": {
-    "weighted_score": 3.57,
+    "weighted_score": 3.5,
     "weights": {
       "CL-001": 1.0,
       "CL-003": 1.0,
@@ -3299,14 +1903,14 @@
     "strengths": [
       "创新性/新颖性 (5.0)",
       "学术贡献度 (5.0)",
-      "声明-证据一致性 (5.0)"
+      "可复现性 (5.0)"
     ],
     "weaknesses": [
       "统计严谨性与披露 (1.0)",
       "数据集贡献 (0.0)",
       "伦理合规 (0.0)"
     ],
-    "conclusion": "整体评分 3.57/5；主要优势：创新性/新颖性 (5.0)、学术贡献度 (5.0)、声明-证据一致性 (5.0)；主要不足：统计严谨性与披露 (1.0)、数据集贡献 (0.0)、伦理合规 (0.0)。",
+    "conclusion": "整体评分 3.50/5；主要优势：创新性/新颖性 (5.0)、学术贡献度 (5.0)、可复现性 (5.0)；主要不足：统计严谨性与披露 (1.0)、数据集贡献 (0.0)、伦理合规 (0.0)。",
     "caveats": []
   }
 }

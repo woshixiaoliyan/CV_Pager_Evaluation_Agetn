@@ -106,3 +106,50 @@ def test_chat_json_salvages_unclosed_array(monkeypatch):
     monkeypatch.setattr("cvpaper_eval.llm.urllib.request.urlopen", fake_urlopen)
     client = LLMClient(Settings(api_key="sk-test"))
     assert client.chat_json("sys", "user") == {"metrics": [{"task": "a"}, {"task": "b"}]}
+
+def test_chat_json_salvages_flat_objects(monkeypatch):
+    class FakeResp:
+        def read(self):
+            return b'{"choices": [{"message": {"content": "{\\"metrics\\": [{\\"task\\": \\"a\\"}, {\\"task\\": \\"b\\"}, {\\"task\\""}}]}'
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            return False
+
+    def fake_urlopen(req, timeout):
+        return FakeResp()
+
+    monkeypatch.setattr("cvpaper_eval.llm.urllib.request.urlopen", fake_urlopen)
+    client = LLMClient(Settings(api_key="sk-test"))
+    assert client.chat_json("sys", "user") == {"metrics": [{"task": "a"}, {"task": "b"}]}
+
+
+def test_chat_json_retries_on_invalid_json(monkeypatch):
+    calls = {"n": 0}
+
+    class FakeResp:
+        def read(self):
+            return b'{"choices": [{"message": {"content": "{\\"ok\\": true}"}}]}'
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            return False
+
+    def fake_urlopen(req, timeout):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return FakeRespInvalid()
+        return FakeResp()
+
+    class FakeRespInvalid:
+        def read(self):
+            return b'{"choices": [{"message": {"content": "not json at all"}}]}'
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            return False
+
+    monkeypatch.setattr("cvpaper_eval.llm.urllib.request.urlopen", fake_urlopen)
+    client = LLMClient(Settings(api_key="sk-test"))
+    assert client.chat_json("sys", "user") == {"ok": True}
+    assert calls["n"] == 2

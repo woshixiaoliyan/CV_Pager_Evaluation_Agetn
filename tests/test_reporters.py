@@ -19,3 +19,17 @@ def test_markdown_contains_sections():
 def test_json_roundtrip():
     data = json.loads(render_json(_report()))
     assert data["paper"]["title"] == "T"
+
+
+def test_markdown_uses_summary_tables():
+    md = render_markdown(_report())
+    assert "实验指标摘要" in md
+    assert "对比结论摘要" in md
+    assert "M-000" not in md
+
+def test_markdown_warns_when_no_ours():
+    from cvpaper_eval.models import Metric
+    report = _report()
+    report.metrics = [Metric(metric_id="M-0", metric_name="mAP", value=0.48, method_key="Faster R-CNN", source_location="T1")]
+    md = render_markdown(report)
+    assert "未能从论文中识别" in md

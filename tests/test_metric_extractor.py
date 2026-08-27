@@ -33,3 +33,39 @@ def test_extract_metrics_retries_on_empty():
     assert len(metrics) == 1
     assert metrics[0].value == 0.482
     assert metrics[0].normalization_note == ""
+
+class FakeChatProposed:
+    def chat_json(self, system, user):
+        return {
+            "proposed_method": "DETR",
+            "metrics": [
+                {"task": "detection", "dataset": "COCO", "metric_name": "AP", "value": 44.9, "method_key": "DETR-DC5", "source_location": "T1", "normalization_note": None},
+                {"task": "detection", "dataset": "COCO", "metric_name": "AP", "value": 42.0, "method_key": "DETR", "source_location": "T1", "normalization_note": None},
+                {"task": "detection", "dataset": "COCO", "metric_name": "AP", "value": 39.0, "method_key": "Faster R-CNN", "source_location": "T1", "normalization_note": None}
+            ]
+        }
+
+def test_extract_metrics_normalizes_proposed_method():
+    kb = {"metric_schema": {"direction_defaults": {}}}
+    metrics = extract_metrics(FakeChatProposed(), "text", [], kb)
+    ours = [m for m in metrics if m.method_key == "Ours"]
+    assert len(ours) == 2
+    assert metrics[2].method_key == "Faster R-CNN"
+
+class FakeChatNoOursFirst:
+    def __init__(self):
+        self.calls = 0
+    def chat_json(self, system, user):
+        self.calls += 1
+        base = {"task": "detection", "dataset": "COCO", "metric_name": "AP", "value": 39.0, "method_key": "Faster RCNN-DC5", "source_location": "T1", "normalization_note": None}
+        if self.calls == 1:
+            return {"proposed_method": "DETR", "metrics": [base]}
+        detr = {"task": "detection", "dataset": "COCO", "metric_name": "AP", "value": 44.9, "method_key": "DETR-DC5", "source_location": "T1", "normalization_note": None}
+        return {"proposed_method": "DETR", "metrics": [base, detr]}
+
+def test_extract_metrics_retries_when_no_ours():
+    kb = {"metric_schema": {"direction_defaults": {}}}
+    fake = FakeChatNoOursFirst()
+    metrics = extract_metrics(fake, "text", [], kb)
+    assert fake.calls == 2
+    assert any(m.method_key == "Ours" for m in metrics)

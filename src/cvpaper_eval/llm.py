@@ -14,6 +14,9 @@ class ChatJSON(Protocol):
     def chat_json(self, system: str, user: str) -> dict: ...
 
 
+_SINGLE_LIST_KEYS = ("metrics", "dimension_scores")
+
+
 def _parse_content(content: str) -> dict:
     cleaned = content.strip()
     if cleaned.startswith("```"):
@@ -37,6 +40,19 @@ def _parse_content(content: str) -> dict:
             return json.loads(cleaned + suffix)
         except json.JSONDecodeError:
             continue
+    # Last resort: collect complete flat JSON objects. Works when the output
+    # is a list of flat objects (metrics, dimension_scores) cut off mid-item;
+    # the trailing partial object is dropped.
+    for key in _SINGLE_LIST_KEYS:
+        if re.search(r'"' + key + r'"\s*:', cleaned):
+            parsed = []
+            for obj in re.findall(r"\{[^{}]*\}", cleaned):
+                try:
+                    parsed.append(json.loads(obj))
+                except json.JSONDecodeError:
+                    continue
+            if parsed:
+                return {key: parsed}
     raise ValueError(f"LLM returned invalid JSON content: {content[:160]!r}")
 
 
@@ -81,7 +97,13 @@ class LLMClient:
                 with urllib.request.urlopen(req, timeout=120) as resp:
                     data = json.loads(resp.read().decode("utf-8"))
                 content = data["choices"][0]["message"]["content"]
-                return _parse_content(content)
+                try:
+                    return _parse_content(content)
+                except ValueError:
+                    if attempt < 2:
+                        time.sleep(1.5 * (attempt + 1))
+                        continue
+                    raise
             except urllib.error.HTTPError as e:
                 detail = e.read().decode("utf-8", "replace")
                 last_detail = f"LLM API error {e.code}: {detail}"
