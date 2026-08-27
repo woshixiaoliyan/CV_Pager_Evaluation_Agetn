@@ -23,11 +23,14 @@ def test_fetch_arxiv(monkeypatch, tmp_path):
         def __exit__(self, *args):
             return False
     def fake_urlopen(url, **kw):
-        if "export.arxiv.org" in url:
+        req = url if isinstance(url, urllib.request.Request) else None
+        target = req.full_url if req else url
+        assert req is None or req.get_header("User-agent"), "arxiv requests must send a User-Agent header"
+        if "export.arxiv.org" in target:
             return FakeResp(ATOM)
-        if "arxiv.org/pdf" in url:
+        if "arxiv.org/pdf" in target:
             return FakeResp(b"%PDF-1.4 fake")
-        raise URLError(f"unexpected {url}")
+        raise URLError(f"unexpected {target}")
     monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
     meta, pdf = fetch_arxiv("2501.00001", tmp_path)
     assert meta.title == "OursNet: A Test"
