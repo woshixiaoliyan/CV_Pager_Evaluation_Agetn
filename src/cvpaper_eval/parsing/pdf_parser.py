@@ -26,17 +26,41 @@ def flatten_table_rows(rows: list[list]) -> list[dict]:
     return out
 
 
-def parse_pdf(path: str) -> tuple[str, list[dict]]:
-    doc = fitz.open(path)
-    text_parts: list[str] = []
+def _extract_tables_fitz(doc) -> list[dict]:
     tables: list[dict] = []
     table_index = 0
     for page in doc:
-        text_parts.append(page.get_text("text"))
         for raw in page.find_tables().tables:
             table_index += 1
             rows = flatten_table_rows(raw.extract())
             if rows:
                 tables.append({"id": f"TABLE {table_index}", "rows": rows})
+    return tables
+
+
+def _extract_tables_pdfplumber(path: str) -> list[dict]:
+    import pdfplumber
+
+    tables: list[dict] = []
+    table_index = 0
+    with pdfplumber.open(path) as pdf:
+        for page in pdf.pages:
+            for raw in page.extract_tables():
+                table_index += 1
+                rows = flatten_table_rows(raw)
+                if rows:
+                    tables.append({"id": f"TABLE {table_index}", "rows": rows})
+    return tables
+
+
+def parse_pdf(path: str) -> tuple[str, list[dict]]:
+    doc = fitz.open(path)
+    text_parts = [page.get_text("text") for page in doc]
     doc.close()
+    try:
+        tables = _extract_tables_pdfplumber(path)
+    except ImportError:
+        doc = fitz.open(path)
+        tables = _extract_tables_fitz(doc)
+        doc.close()
     return "\n".join(text_parts), tables

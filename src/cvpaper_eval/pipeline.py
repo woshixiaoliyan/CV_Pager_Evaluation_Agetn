@@ -6,6 +6,7 @@ from .comparison.comparator import build_comparisons
 from .config import Settings
 from .extraction.metric_extractor import extract_metrics
 from .extraction.qualitative_extractor import extract_qualitative
+from .extraction.evidence_check import metric_has_evidence
 from .extraction.validation import validate_metric
 from .knowledge_base import load_knowledge_base
 from .llm import LLMClient
@@ -48,6 +49,7 @@ def run_evaluation(source: str, source_kind: Literal["pdf", "arxiv", "text"], se
     raw_tables = [t.model_dump() for t in tables]
     metrics = extract_metrics(chat, full_text, raw_tables, kb)
     metrics = [m for m in metrics if not validate_metric(m)]
+    metrics = [m for m in metrics if metric_has_evidence(m, full_text, raw_tables)]
     comparisons = build_comparisons(metrics)
     qualitative = extract_qualitative(chat, full_text, kb)
     scores = score_dimensions(chat, comparisons, qualitative, kb)

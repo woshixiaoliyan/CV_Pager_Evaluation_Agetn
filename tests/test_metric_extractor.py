@@ -69,3 +69,21 @@ def test_extract_metrics_retries_when_no_ours():
     metrics = extract_metrics(fake, "text", [], kb)
     assert fake.calls == 2
     assert any(m.method_key == "Ours" for m in metrics)
+
+def test_extract_metrics_normalizes_variant_and_drops_unresolved_direction():
+    class FakeChatMixed:
+        def chat_json(self, system, user):
+            return {
+                "proposed_method": "Ours",
+                "metrics": [
+                    {"task": "detection", "dataset": " COCO ", "metric_name": "mAP", "metric_variant": "mAP@0.5:0.95", "value": 0.482, "method_key": "Ours", "source_location": "T1"},
+                    {"task": "detection", "dataset": "COCO", "metric_name": "mAP", "metric_variant": "0.5:0.95", "value": 0.421, "method_key": "Base", "source_location": "T1"},
+                    {"task": "detection", "dataset": "COCO", "metric_name": "zzzmetric", "value": 1.0, "method_key": "Ours", "source_location": "T1"}
+                ]
+            }
+
+    kb = {"metric_schema": {"direction_defaults": {}}}
+    metrics = extract_metrics(FakeChatMixed(), "text", [], kb)
+    assert len(metrics) == 2
+    assert metrics[0].metric_variant == metrics[1].metric_variant
+    assert metrics[0].dataset == "COCO"
