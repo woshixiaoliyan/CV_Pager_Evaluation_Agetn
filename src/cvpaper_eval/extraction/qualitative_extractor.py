@@ -8,7 +8,7 @@ KEYS = ["novelty_claims", "limitations", "openness", "ethics", "related_work", "
 
 SYSTEM_PROMPT = (
     "Extract qualitative evaluation evidence from a computer vision paper. "
-    'Return a JSON object with keys: novelty_claims, limitations, openness, ethics, related_work, clarity. '
+    'Return a compact JSON object (no pretty-printing or newlines). with keys: novelty_claims, limitations, openness, ethics, related_work, clarity. '
     'Each value is a list of {"text": str, "location": str}. '
     "Only include sentences actually present in the paper text."
 )

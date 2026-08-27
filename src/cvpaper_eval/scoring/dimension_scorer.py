@@ -7,11 +7,24 @@ from ..models import Comparison, DimensionScore, Summary
 
 SYSTEM_PROMPT = (
     "You are an expert reviewer of computer vision papers. Score each dimension 0-5 "
-    "using the provided rubric and the evidence. Return JSON: "
+    "using the provided rubric and the evidence. Return compact JSON (no pretty-printing): "
     '{"dimension_scores": [{"cluster_id", "score", "confidence", "evidence": [str]}]}. '
     "Never invent evidence; only reuse provided comparisons and qualitative evidence."
 )
 
+
+
+
+def _normalize_confidence(value) -> str:
+    if value in ("high", "medium", "low"):
+        return value
+    if isinstance(value, (int, float)):
+        if value >= 0.8:
+            return "high"
+        if value >= 0.5:
+            return "medium"
+        return "low"
+    return "medium"
 
 def score_dimensions(chat: ChatJSON, comparisons: list[Comparison], qualitative: dict, kb: dict) -> list[DimensionScore]:
     dims = [d for d in kb.get("dimensions", []) if d.get("status") == "evaluated"]
@@ -36,7 +49,7 @@ def score_dimensions(chat: ChatJSON, comparisons: list[Comparison], qualitative:
                 cluster_id=cid,
                 dimension=by_id[cid]["name"],
                 score=float(raw.get("score", 0)),
-                confidence=raw.get("confidence", "medium"),
+                confidence=_normalize_confidence(raw.get("confidence", "medium")),
                 evidence=[str(e) for e in raw.get("evidence", [])],
             )
         )

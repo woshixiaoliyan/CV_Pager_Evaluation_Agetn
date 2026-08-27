@@ -17,3 +17,10 @@ def test_flatten_table_rows():
     out = flatten_table_rows(rows)
     assert out[0]["header"] == "Method mAP FPS"
     assert out[0]["cells"] == ["Ours", "0.482", "35"]
+
+
+def test_flatten_table_rows_ignores_none_and_empty():
+    rows = [["Method", "mAP", None], ["Ours", "0.482", None], [None, None, None]]
+    out = flatten_table_rows(rows)
+    assert len(out) == 1
+    assert out[0]["cells"] == ["Ours", "0.482", ""]

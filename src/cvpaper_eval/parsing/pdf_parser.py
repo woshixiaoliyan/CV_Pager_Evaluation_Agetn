@@ -3,14 +3,26 @@ from __future__ import annotations
 import fitz
 
 
-def flatten_table_rows(rows: list[list[str]]) -> list[dict]:
-    """把 pymupdf extract() 的二维数组转成 {header, cells} 行记录，首行视为表头。"""
+def _clean_cells(cells: list) -> list[str]:
+    return ["" if c is None else str(c).strip() for c in cells]
+
+
+def flatten_table_rows(rows: list[list]) -> list[dict]:
+    """把 pymupdf extract() 的二维数组转成 {header, cells} 行记录。
+
+    首行视为表头；None 转空串；空表头或全空行丢弃。
+    """
     if not rows:
         return []
-    header = " ".join(str(c).strip() for c in rows[0])
+    header = " ".join(c for c in _clean_cells(rows[0]) if c)
+    if not header:
+        return []
     out: list[dict] = []
     for row in rows[1:]:
-        out.append({"header": header, "cells": [str(c).strip() for c in row]})
+        cells = _clean_cells(row)
+        if not any(cells):
+            continue
+        out.append({"header": header, "cells": cells})
     return out
 
 

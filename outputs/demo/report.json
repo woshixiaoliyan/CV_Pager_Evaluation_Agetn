@@ -1,0 +1,3312 @@
+{
+  "paper": {
+    "title": "End-to-End Object Detection with Transformers",
+    "authors": [
+      "Nicolas Carion",
+      "Francisco Massa",
+      "Gabriel Synnaeve",
+      "Nicolas Usunier",
+      "Alexander Kirillov",
+      "Sergey Zagoruyko"
+    ],
+    "year": 2020,
+    "venue": "",
+    "arxiv_id": "2005.12872",
+    "source": "arxiv"
+  },
+  "sections": [
+    {
+      "id": "SEC-001",
+      "heading": "preamble",
+      "text": "End-to-End Object Detection with Transformers\nNicolas Carion⋆, Francisco Massa⋆, Gabriel Synnaeve, Nicolas Usunier,\nAlexander Kirillov, and Sergey Zagoruyko\nFacebook AI\nAbstract. We present a new method that views object detection as a\ndirect set prediction problem. Our approach streamlines the detection\npipeline, eﬀectively removing the need for many hand-designed compo-\nnents like a non-maximum suppression procedure or anchor generation\nthat explicitly encode our prior knowledge about the task. The main\ningredients of the new framework, called DEtection TRansformer or\nDETR, are a set-based global loss that forces unique predictions via bi-\npartite matching, and a transformer encoder-decoder architecture. Given\na ﬁxed small set of learned object queries, DETR reasons about the re-\nlations of the objects and the global image context to directly output\nthe ﬁnal set of predictions in parallel. The new model is conceptually\nsimple and does not require a specialized library, unlike many other\nmodern detectors. DETR demonstrates accuracy and run-time perfor-\nmance on par with the well-established and highly-optimized Faster R-\nCNN baseline on the challenging COCO object detection dataset. More-\nover, DETR can be easily generalized to produce panoptic segmentation\nin a uniﬁed manner. We show that it signiﬁcantly outperforms com-\npetitive baselines. Training code and pretrained models are available at\nhttps://github.com/facebookresearch/detr.\n1"
+    },
+    {
+      "id": "SEC-002",
+      "heading": "Introduction",
+      "text": "The goal of object detection is to predict a set of bounding boxes and category\nlabels for each object of interest. Modern detectors address this set prediction\ntask in an indirect way, by deﬁning surrogate regression and classiﬁcation prob-\nlems on a large set of proposals [37,5], anchors [23], or window centers [53,46].\nTheir performances are signiﬁcantly inﬂuenced by postprocessing steps to col-\nlapse near-duplicate predictions, by the design of the anchor sets and by the\nheuristics that assign target boxes to anchors [52]. To simplify these pipelines,\nwe propose a direct set prediction approach to bypass the surrogate tasks. This\nend-to-end philosophy has led to signiﬁcant advances in complex structured pre-\ndiction tasks such as machine translation or speech recognition, but not yet in\nobject detection: previous attempts [43,16,4,39] either add other forms of prior\nknowledge, or have not proven to be competitive with strong baselines on chal-\nlenging benchmarks. This paper aims to bridge this gap.\n⋆Equal contribution\narXiv:2005.12872v3  [cs.CV]  28 May 2020\n\n2\nCarion et al.\ntransformer \nencoder-\ndecoder\nCNN\nset of box predictions\nbipartite matching loss\nno object (ø)\nno object (ø)\nset of image features\nFig. 1: DETR directly predicts (in parallel) the ﬁnal set of detections by combining\na common CNN with a transformer architecture. During training, bipartite matching\nuniquely assigns predictions with ground truth boxes. Prediction with no match should\nyield a “no object” (∅) class prediction.\nWe streamline the training pipeline by viewing object detection as a direct set\nprediction problem. We adopt an encoder-decoder architecture based on trans-\nformers [47], a popular architecture for sequence prediction. The self-attention\nmechanisms of transformers, which explicitly model all pairwise interactions be-\ntween elements in a sequence, make these architectures particularly suitable for\nspeciﬁc constraints of set prediction such as removing duplicate predictions.\nOur DEtection TRansformer (DETR, see Figure 1) predicts all objects at\nonce, and is trained end-to-end with a set loss function which performs bipar-\ntite matching between predicted and ground-truth objects. DETR simpliﬁes the\ndetection pipeline by dropping multiple hand-designed components that encode\nprior knowledge, like spatial anchors or non-maximal suppression. Unlike most\nexisting detection methods, DETR doesn’t require any customized layers, and\nthus can be reproduced easily in any framework that contains standard CNN\nand transformer classes.1.\nCompared to most previous work on direct set prediction, the main features of\nDETR are the conjunction of the bipartite matching loss and transformers with\n(non-autoregressive) parallel decoding [29,12,10,8]. In contrast, previous work\nfocused on autoregressive decoding with RNNs [43,41,30,36,42]. Our matching\nloss function uniquely assigns a prediction to a ground truth object, and is\ninvariant to a permutation of predicted objects, so we can emit them in parallel.\nWe evaluate DETR on one of the most popular object detection datasets,\nCOCO [24], against a very competitive Faster R-CNN baseline [37]. Faster R-\nCNN has undergone many design iterations and its performance was greatly\nimproved since the original publication. Our experiments show that our new\nmodel achieves comparable performances. More precisely, DETR demonstrates\nsigniﬁcantly better performance on large objects, a result likely enabled by the\nnon-local computations of the transformer. It obtains, however, lower perfor-\nmances on small objects. We expect that future work will improve this aspect\nin the same way the development of FPN [22] did for Faster R-CNN.\nTraining settings for DETR diﬀer from standard object detectors in mul-\ntiple ways. The new model requires extra-long training schedule and beneﬁts\n1 In our work we use standard implementations of Transformers [47] and ResNet [15]\nbackbones from standard deep learning libraries.\n\nEnd-to-End Object Detection with Transformers\n3\nfrom auxiliary decoding losses in the transformer. We thoroughly explore what\ncomponents are crucial for the demonstrated performance.\nThe design ethos of DETR easily extend to more complex tasks. In our\nexperiments, we show that a simple segmentation head trained on top of a pre-\ntrained DETR outperfoms competitive baselines on Panoptic Segmentation [19],\na challenging pixel-level recognition task that has recently gained popularity.\n2"
+    },
+    {
+      "id": "SEC-003",
+      "heading": "Related work",
+      "text": "Our work build on prior work in several domains: bipartite matching losses for\nset prediction, encoder-decoder architectures based on the transformer, parallel\ndecoding, and object detection methods.\n2.1\nSet Prediction\nThere is no canonical deep learning model to directly predict sets. The basic set\nprediction task is multilabel classiﬁcation (see e.g., [40,33] for references in the\ncontext of computer vision) for which the baseline approach, one-vs-rest, does\nnot apply to problems such as detection where there is an underlying structure\nbetween elements (i.e., near-identical boxes). The ﬁrst diﬃculty in these tasks\nis to avoid near-duplicates. Most current detectors use postprocessings such as\nnon-maximal suppression to address this issue, but direct set prediction are\npostprocessing-free. They need global inference schemes that model interactions\nbetween all predicted elements to avoid redundancy. For constant-size set pre-\ndiction, dense fully connected networks [9] are suﬃcient but costly. A general\napproach is to use auto-regressive sequence models such as recurrent neural net-\nworks [48]. In all cases, the loss function should be invariant by a permutation of\nthe predictions. The usual solution is to design a loss based on the Hungarian al-\ngorithm [20], to ﬁnd a bipartite matching between ground-truth and prediction.\nThis enforces permutation-invariance, and guarantees that each target element\nhas a unique match. We follow the bipartite matching loss approach. In contrast\nto most prior work however, we step away from autoregressive models and use\ntransformers with parallel decoding, which we describe below.\n2.2\nTransformers and Parallel Decoding\nTransformers were introduced by Vaswani et al. [47] as a new attention-based\nbuilding block for machine translation. Attention mechanisms [2] are neural net-\nwork layers that aggregate information from the entire input sequence. Trans-\nformers introduced self-attention layers, which, similarly to Non-Local Neural\nNetworks [49], scan through each element of a sequence and update it by ag-\ngregating information from the whole sequence. One of the main advantages of\nattention-based models is their global computations and perfect memory, which\nmakes them more suitable than RNNs on long sequences. Transformers are now\n\n4\nCarion et al.\nreplacing RNNs in many problems in natural language processing, speech pro-\ncessing and computer vision [8,27,45,34,31].\nTransformers were ﬁrst used in auto-regressive models, following early sequence-\nto-sequence models [44], generating output tokens one by one. However, the pro-\nhibitive inference cost (proportional to output length, and hard to batch) lead\nto the development of parallel sequence generation, in the domains of audio [29],\nmachine translation [12,10], word representation learning [8], and more recently\nspeech recognition [6]. We also combine transformers and parallel decoding for\ntheir suitable trade-oﬀbetween computational cost and the ability to perform\nthe global computations required for set prediction.\n2.3\nObject detection\nMost modern object detection methods make predictions relative to some ini-\ntial guesses. Two-stage detectors [37,5] predict boxes w.r.t. proposals, whereas\nsingle-stage methods make predictions w.r.t. anchors [23] or a grid of possible\nobject centers [53,46]. Recent work [52] demonstrate that the ﬁnal performance\nof these systems heavily depends on the exact way these initial guesses are set.\nIn our model we are able to remove this hand-crafted process and streamline the\ndetection process by directly predicting the set of detections with absolute box\nprediction w.r.t. the input image rather than an anchor.\nSet-based loss. Several object detectors [9,25,35] used the bipartite matching\nloss. However, in these early deep learning models, the relation between diﬀerent\nprediction was modeled with convolutional or fully-connected layers only and a\nhand-designed NMS post-processing can improve their performance. More recent\ndetectors [37,23,53] use non-unique assignment rules between ground truth and\npredictions together with an NMS.\nLearnable NMS methods [16,4] and relation networks [17] explicitly model\nrelations between diﬀerent predictions with attention. Using direct set losses,\nthey do not require any post-processing steps. However, these methods employ\nadditional hand-crafted context features like proposal box coordinates to model\nrelations between detections eﬃciently, while we look for solutions that reduce\nthe prior knowledge encoded in the model.\nRecurrent detectors. Closest to our approach are end-to-end set predictions\nfor object detection [43] and instance segmentation [41,30,36,42]. Similarly to us,\nthey use bipartite-matching losses with encoder-decoder architectures based on\nCNN activations to directly produce a set of bounding boxes. These approaches,\nhowever, were only evaluated on small datasets and not against modern baselines.\nIn particular, they are based on autoregressive models (more precisely RNNs),\nso they do not leverage the recent transformers with parallel decoding.\n3\nThe DETR model\nTwo ingredients are essential for direct set predictions in detection: (1) a set\nprediction loss that forces unique matching between predicted and ground truth\n\nEnd-to-End Object Detection with Transformers\n5\nboxes; (2) an architecture that predicts (in a single pass) a set of objects and\nmodels their relation. We describe our architecture in detail in Figure 2.\n3.1\nObject detection set prediction loss\nDETR infers a ﬁxed-size set of N predictions, in a single pass through the\ndecoder, where N is set to be signiﬁcantly larger than the typical number of\nobjects in an image. One of the main diﬃculties of training is to score predicted\nobjects (class, position, size) with respect to the ground truth. Our loss produces\nan optimal bipartite matching between predicted and ground truth objects, and\nthen optimize object-speciﬁc (bounding box) losses.\nLet us denote by y the ground truth set of objects, and ˆy = {ˆyi}N\ni=1 the\nset of N predictions. Assuming N is larger than the number of objects in the\nimage, we consider y also as a set of size N padded with ∅(no object). To ﬁnd\na bipartite matching between these two sets we search for a permutation of N\nelements σ ∈SN with the lowest cost:\nˆσ = arg min\nσ∈SN\nN\nX\ni\nLmatch(yi, ˆyσ(i)),\n(1)\nwhere Lmatch(yi, ˆyσ(i)) is a pair-wise matching cost between ground truth yi and\na prediction with index σ(i). This optimal assignment is computed eﬃciently\nwith the Hungarian algorithm, following prior work (e.g. [43]).\nThe matching cost takes into account both the class prediction and the sim-\nilarity of predicted and ground truth boxes. Each element i of the ground truth\nset can be seen as a yi = (ci, bi) where ci is the target class label (which\nmay be ∅) and bi ∈[0, 1]4 is a vector that deﬁnes ground truth box cen-\nter coordinates and its height and width relative to the image size. For the\nprediction with index σ(i) we deﬁne probability of class ci as ˆpσ(i)(ci) and\nthe predicted box as ˆbσ(i). With these notations we deﬁne Lmatch(yi, ˆyσ(i)) as\n−1{ci̸=∅}ˆpσ(i)(ci) + 1{ci̸=∅}Lbox(bi,ˆbσ(i)).\nThis procedure of ﬁnding matching plays the same role as the heuristic assign-\nment rules used to match proposal [37] or anchors [22] to ground truth objects\nin modern detectors. The main diﬀerence is that we need to ﬁnd one-to-one\nmatching for direct set prediction without duplicates.\nThe second step is to compute the loss function, the Hungarian loss for all\npairs matched in the previous step. We deﬁne the loss similarly to the losses of\ncommon object detectors, i.e. a linear combination of a negative log-likelihood\nfor class prediction and a box loss deﬁned later:\nLHungarian(y, ˆy) =\nN\nX\ni=1\nh\n−log ˆpˆσ(i)(ci) + 1{ci̸=∅}Lbox(bi,ˆbˆσ(i))\ni\n,\n(2)\nwhere ˆσ is the optimal assignment computed in the ﬁrst step (1). In practice, we\ndown-weight the log-probability term when ci = ∅by a factor 10 to account for\n\n6\nCarion et al.\nclass imbalance. This is analogous to how Faster R-CNN training procedure bal-\nances positive/negative proposals by subsampling [37]. Notice that the matching\ncost between an object and ∅doesn’t depend on the prediction, which means\nthat in that case the cost is a constant. In the matching cost we use probabil-\nities ˆpˆσ(i)(ci) instead of log-probabilities. This makes the class prediction term\ncommensurable to Lbox(·, ·) (described below), and we observed better empirical\nperformances.\nBounding box loss. The second part of the matching cost and the Hungarian\nloss is Lbox(·) that scores the bounding boxes. Unlike many detectors that do box\npredictions as a ∆w.r.t. some initial guesses, we make box predictions directly.\nWhile such approach simplify the implementation it poses an issue with relative\nscaling of the loss. The most commonly-used ℓ1 loss will have diﬀerent scales for\nsmall and large boxes even if their relative errors are similar. To mitigate this\nissue we use a linear combination of the ℓ1 loss and the generalized IoU loss [38]\nLiou(·, ·) that is scale-invariant. Overall, our box loss is Lbox(bi,ˆbσ(i)) deﬁned as\nλiouLiou(bi,ˆbσ(i)) + λL1||bi −ˆbσ(i)||1 where λiou, λL1 ∈R are hyperparameters.\nThese two losses are normalized by the number of objects inside the batch.\n3.2\nDETR architecture\nThe overall DETR architecture is surprisingly simple and depicted in Figure 2. It\ncontains three main components, which we describe below: a CNN backbone to\nextract a compact feature representation, an encoder-decoder transformer, and\na simple feed forward network (FFN) that makes the ﬁnal detection prediction.\nUnlike many modern detectors, DETR can be implemented in any deep learn-\ning framework that provides a common CNN backbone and a transformer archi-\ntecture implementation with just a few hundred lines. Inference code for DETR\ncan be implemented in less than 50 lines in PyTorch [32]. We hope that the sim-\nplicity of our method will attract new researchers to the detection community.\nBackbone. Starting from the initial image ximg ∈R3×H0×W0 (with 3 color\nchannels2), a conventional CNN backbone generates a lower-resolution activation\nmap f ∈RC×H×W . Typical values we use are C = 2048 and H, W = H0\n32 , W0\n32 .\nTransformer encoder. First, a 1x1 convolution reduces the channel dimension\nof the high-level activation map f from C to a smaller dimension d. creating a\nnew feature map z0 ∈Rd×H×W . The encoder expects a sequence as input, hence\nwe collapse the spatial dimensions of z0 into one dimension, resulting in a d×HW\nfeature map. Each encoder layer has a standard architecture and consists of a\nmulti-head self-attention module and a feed forward network (FFN). Since the\ntransformer architecture is permutation-invariant, we supplement it with ﬁxed\npositional encodings [31,3] that are added to the input of each attention layer. We\ndefer to the supplementary material the detailed deﬁnition of the architecture,\nwhich follows the one described in [47].\n2 The input images are batched together, applying 0-padding adequately to ensure\nthey all have the same dimensions (H0, W0) as the largest image of the batch.\n\nEnd-to-End Object Detection with Transformers\n7\nCNN\nset of image features\ntransformer \nencoder\n…\n…\npositional encoding\n+\ntransformer \ndecoder\nclass,\nbox\nclass,\nbox\nno \nobject\nno \nobject\nFFN\nFFN\nFFN\nFFN\nobject queries\nbackbone\nencoder\ndecoder\nprediction heads\nFig. 2: DETR uses a conventional CNN backbone to learn a 2D representation of an\ninput image. The model ﬂattens it and supplements it with a positional encoding before\npassing it into a transformer encoder. A transformer decoder then takes as input a\nsmall ﬁxed number of learned positional embeddings, which we call object queries, and\nadditionally attends to the encoder output. We pass each output embedding of the\ndecoder to a shared feed forward network (FFN) that predicts either a detection (class\nand bounding box) or a “no object” class.\nTransformer decoder. The decoder follows the standard architecture of the\ntransformer, transforming N embeddings of size d using multi-headed self- and\nencoder-decoder attention mechanisms. The diﬀerence with the original trans-\nformer is that our model decodes the N objects in parallel at each decoder layer,\nwhile Vaswani et al. [47] use an autoregressive model that predicts the output\nsequence one element at a time. We refer the reader unfamiliar with the concepts\nto the supplementary material. Since the decoder is also permutation-invariant,\nthe N input embeddings must be diﬀerent to produce diﬀerent results. These in-\nput embeddings are learnt positional encodings that we refer to as object queries,\nand similarly to the encoder, we add them to the input of each attention layer.\nThe N object queries are transformed into an output embedding by the decoder.\nThey are then independently decoded into box coordinates and class labels by\na feed forward network (described in the next subsection), resulting N ﬁnal\npredictions. Using self- and encoder-decoder attention over these embeddings,\nthe model globally reasons about all objects together using pair-wise relations\nbetween them, while being able to use the whole image as context.\nPrediction feed-forward networks (FFNs). The ﬁnal prediction is com-\nputed by a 3-layer perceptron with ReLU activation function and hidden dimen-\nsion d, and a linear projection layer. The FFN predicts the normalized center\ncoordinates, height and width of the box w.r.t. the input image, and the lin-\near layer predicts the class label using a softmax function. Since we predict a\nﬁxed-size set of N bounding boxes, where N is usually much larger than the\nactual number of objects of interest in an image, an additional special class la-\nbel ∅is used to represent that no object is detected within a slot. This class\nplays a similar role to the “background” class in the standard object detection\napproaches.\nAuxiliary decoding losses. We found helpful to use auxiliary losses [1] in\ndecoder during training, especially to help the model output the correct number\n\n8\nCarion et al.\nof objects of each class. We add prediction FFNs and Hungarian loss after each\ndecoder layer. All predictions FFNs share their parameters. We use an additional\nshared layer-norm to normalize the input to the prediction FFNs from diﬀerent\ndecoder layers.\n4"
+    },
+    {
+      "id": "SEC-004",
+      "heading": "Experiments",
+      "text": "We show that DETR achieves competitive results compared to Faster R-CNN\nin quantitative evaluation on COCO. Then, we provide a detailed ablation\nstudy of the architecture and loss, with insights and qualitative results. Fi-\nnally, to show that DETR is a versatile and extensible model, we present results\non panoptic segmentation, training only a small extension on a ﬁxed DETR\nmodel. We provide code and pretrained models to reproduce our experiments at\nhttps://github.com/facebookresearch/detr.\nDataset. We perform experiments on COCO 2017 detection and panoptic seg-\nmentation datasets [24,18], containing 118k training images and 5k validation\nimages. Each image is annotated with bounding boxes and panoptic segmenta-\ntion. There are 7 instances per image on average, up to 63 instances in a single\nimage in training set, ranging from small to large on the same images. If not\nspeciﬁed, we report AP as bbox AP, the integral metric over multiple thresholds.\nFor comparison with Faster R-CNN we report validation AP at the last training\nepoch, for ablations we report median over validation results from the last 10\nepochs.\nTechnical details. We train DETR with AdamW [26] setting the initial trans-\nformer’s learning rate to 10−4, the backbone’s to 10−5, and weight decay to 10−4.\nAll transformer weights are initialized with Xavier init [11], and the backbone\nis with ImageNet-pretrained ResNet model [15] from torchvision with frozen\nbatchnorm layers. We report results with two diﬀerent backbones: a ResNet-\n50 and a ResNet-101. The corresponding models are called respectively DETR\nand DETR-R101. Following\n[21], we also increase the feature resolution by\nadding a dilation to the last stage of the backbone and removing a stride from\nthe ﬁrst convolution of this stage. The corresponding models are called respec-\ntively DETR-DC5 and DETR-DC5-R101 (dilated C5 stage). This modiﬁcation\nincreases the resolution by a factor of two, thus improving performance for small\nobjects, at the cost of a 16x higher cost in the self-attentions of the encoder,\nleading to an overall 2x increase in computational cost. A full comparison of\nFLOPs of these models and Faster R-CNN is given in Table 1.\nWe use scale augmentation, resizing the input images such that the shortest\nside is at least 480 and at most 800 pixels while the longest at most 1333 [50].\nTo help learning global relationships through the self-attention of the encoder,\nwe also apply random crop augmentations during training, improving the per-\nformance by approximately 1 AP. Speciﬁcally, a train image is cropped with\nprobability 0.5 to a random rectangular patch which is then resized again to\n800-1333. The transformer is trained with default dropout of 0.1. At inference\n\nEnd-to-End Object Detection with Transformers\n9\nTable 1: Comparison with Faster R-CNN with a ResNet-50 and ResNet-101 backbones\non the COCO validation set. The top section shows results for Faster R-CNN models\nin Detectron2 [50], the middle section shows results for Faster R-CNN models with\nGIoU [38], random crops train-time augmentation, and the long 9x training schedule.\nDETR models achieve comparable results to heavily tuned Faster R-CNN baselines,\nhaving lower APS but greatly improved APL. We use torchscript Faster R-CNN and\nDETR models to measure FLOPS and FPS. Results without R101 in the name corre-\nspond to ResNet-50.\nModel\nGFLOPS/FPS #params AP AP50 AP75 APS APM APL\nFaster RCNN-DC5\n320/16\n166M\n39.0 60.5\n42.3 21.4 43.5 52.5\nFaster RCNN-FPN\n180/26\n42M\n40.2 61.0\n43.8 24.2 43.5 52.0\nFaster RCNN-R101-FPN\n246/20\n60M\n42.0 62.5\n45.9 25.2 45.6 54.6\nFaster RCNN-DC5+\n320/16\n166M\n41.1 61.4\n44.3 22.9 45.9 55.0\nFaster RCNN-FPN+\n180/26\n42M\n42.0 62.1\n45.5 26.6 45.4 53.4\nFaster RCNN-R101-FPN+\n246/20\n60M\n44.0 63.9 47.8 27.2 48.1 56.0\nDETR\n86/28\n41M\n42.0 62.4\n44.2 20.5 45.8 61.1\nDETR-DC5\n187/12\n41M\n43.3 63.1\n45.9 22.5 47.3 61.1\nDETR-R101\n152/20\n60M\n43.5 63.8\n46.4 21.9 48.0 61.8\nDETR-DC5-R101\n253/10\n60M\n44.9 64.7 47.7 23.7 49.5 62.3\ntime, some slots predict empty class. To optimize for AP, we override the predic-\ntion of these slots with the second highest scoring class, using the corresponding\nconﬁdence. This improves AP by 2 points compared to ﬁltering out empty slots.\nOther training hyperparameters can be found in section A.4. For our ablation\nexperiments we use training schedule of 300 epochs with a learning rate drop\nby a factor of 10 after 200 epochs, where a single epoch is a pass over all train-\ning images once. Training the baseline model for 300 epochs on 16 V100 GPUs\ntakes 3 days, with 4 images per GPU (hence a total batch size of 64). For the\nlonger schedule used to compare with Faster R-CNN we train for 500 epochs\nwith learning rate drop after 400 epochs. This schedule adds 1.5 AP compared\nto the shorter schedule.\n4.1\nComparison with Faster R-CNN\nTransformers are typically trained with Adam or Adagrad optimizers with very\nlong training schedules and dropout, and this is true for DETR as well. Faster\nR-CNN, however, is trained with SGD with minimal data augmentation and\nwe are not aware of successful applications of Adam or dropout. Despite these\ndiﬀerences we attempt to make a Faster R-CNN baseline stronger. To align it\nwith DETR, we add generalized IoU [38] to the box loss, the same random\ncrop augmentation and long training known to improve results [13]. Results\nare presented in Table 1. In the top section we show Faster R-CNN results\nfrom Detectron2 Model Zoo [50] for models trained with the 3x schedule. In the\nmiddle section we show results (with a “+”) for the same models but trained\n\n10\nCarion et al.\nTable 2: Eﬀect of encoder size. Each row corresponds to a model with varied number\nof encoder layers and ﬁxed number of decoder layers. Performance gradually improves\nwith more encoder layers.\n#layers\nGFLOPS/FPS\n#params\nAP\nAP50\nAPS\nAPM\nAPL\n0\n76/28\n33.4M\n36.7\n57.4\n16.8\n39.6\n54.2\n3\n81/25\n37.4M\n40.1\n60.6\n18.5\n43.8\n58.6\n6\n86/23\n41.3M\n40.6\n61.6\n19.9\n44.3\n60.2\n12\n95/20\n49.2M\n41.6\n62.1\n19.8\n44.9\n61.9\nwith the 9x schedule (109 epochs) and the described enhancements, which in\ntotal adds 1-2 AP. In the last section of Table 1 we show the results for multiple\nDETR models. To be comparable in the number of parameters we choose a\nmodel with 6 transformer and 6 decoder layers of width 256 with 8 attention\nheads. Like Faster R-CNN with FPN this model has 41.3M parameters, out of\nwhich 23.5M are in ResNet-50, and 17.8M are in the transformer. Even though\nboth Faster R-CNN and DETR are still likely to further improve with longer\ntraining, we can conclude that DETR can be competitive with Faster R-CNN\nwith the same number of parameters, achieving 42 AP on the COCO val subset.\nThe way DETR achieves this is by improving APL (+7.8), however note that the\nmodel is still lagging behind in APS (-5.5). DETR-DC5 with the same number\nof parameters and similar FLOP count has higher AP, but is still signiﬁcantly\nbehind in APS too. Faster R-CNN and DETR with ResNet-101 backbone show\ncomparable results as well.\n4.2\nAblations\nAttention mechanisms in the transformer decoder are the key components which\nmodel relations between feature representations of diﬀerent detections. In our\nablation analysis, we explore how other components of our architecture and loss\ninﬂuence the ﬁnal performance. For the study we choose ResNet-50-based DETR\nmodel with 6 encoder, 6 decoder layers and width 256. The model has 41.3M\nparameters, achieves 40.6 and 42.0 AP on short and long schedules respectively,\nand runs at 28 FPS, similarly to Faster R-CNN-FPN with the same backbone.\nNumber of encoder layers. We evaluate the importance of global image-\nlevel self-attention by changing the number of encoder layers (Table 2). Without\nencoder layers, overall AP drops by 3.9 points, with a more signiﬁcant drop of\n6.0 AP on large objects. We hypothesize that, by using global scene reasoning,\nthe encoder is important for disentangling objects. In Figure 3, we visualize the\nattention maps of the last encoder layer of a trained model, focusing on a few\npoints in the image. The encoder seems to separate instances already, which\nlikely simpliﬁes object extraction and localization for the decoder.\nNumber of decoder layers. We apply auxiliary losses after each decoding\nlayer (see Section 3.2), hence, the prediction FFNs are trained by design to pre-\n\nEnd-to-End Object Detection with Transformers\n11\nself-attention(430, 600)\nself-attention(520, 450)\nself-attention(450, 830)\nself-attention(440, 1200)\nFig. 3: Encoder self-attention for a set of reference points. The encoder is able to sep-\narate individual instances. Predictions are made with baseline DETR model on a vali-\ndation set image.\ndict objects out of the outputs of every decoder layer. We analyze the importance\nof each decoder layer by evaluating the objects that would be predicted at each\nstage of the decoding (Fig. 4). Both AP and AP50 improve after every layer,\ntotalling into a very signiﬁcant +8.2/9.5 AP improvement between the ﬁrst and\nthe last layer. With its set-based loss, DETR does not need NMS by design. To\nverify this we run a standard NMS procedure with default parameters [50] for\nthe outputs after each decoder. NMS improves performance for the predictions\nfrom the ﬁrst decoder. This can be explained by the fact that a single decoding\nlayer of the transformer is not able to compute any cross-correlations between\nthe output elements, and thus it is prone to making multiple predictions for the\nsame object. In the second and subsequent layers, the self-attention mechanism\nover the activations allows the model to inhibit duplicate predictions. We ob-\nserve that the improvement brought by NMS diminishes as depth increases. At\nthe last layers, we observe a small loss in AP as NMS incorrectly removes true\npositive predictions.\nSimilarly to visualizing encoder attention, we visualize decoder attentions in\nFig. 6, coloring attention maps for each predicted object in diﬀerent colors. We\nobserve that decoder attention is fairly local, meaning that it mostly attends to\nobject extremities such as heads or legs. We hypothesise that after the encoder\nhas separated instances via global attention, the decoder only needs to attend\nto the extremities to extract the class and object boundaries.\nImportance of FFN. FFN inside tranformers can be seen as 1 × 1 convo-\nlutional layers, making encoder similar to attention augmented convolutional\nnetworks [3]. We attempt to remove it completely leaving only attention in the\ntransformer layers. By reducing the number of network parameters from 41.3M\nto 28.7M, leaving only 10.8M in the transformer, performance drops by 2.3 AP,\nwe thus conclude that FFN are important for achieving good results.\nImportance of positional encodings. There are two kinds of positional en-\ncodings in our model: spatial positional encodings and output positional encod-\n\n12\nCarion et al.\n1\n2\n3\n4\n5\n6\n34\n36\n38\n40\n42\ndecoder layer\nAP\nAP No NMS\nAP NMS=0.7\n1\n2\n3\n4\n5\n6\n54\n56\n58\n60\n62\ndecoder layer\nAP50\nAP No NMS\nAP NMS=0.7\nAP50 No NMS\nAP50 NMS=0.7\nFig. 4: AP and AP50 performance after each de-\ncoder layer. A single long schedule baseline model\nis evaluated. DETR does not need NMS by de-\nsign, which is validated by this ﬁgure. NMS lowers\nAP in the ﬁnal layers, removing TP predictions,\nbut improves AP in the ﬁrst decoder layers, re-\nmoving double predictions, as there is no commu-\nnication in the ﬁrst layer, and slightly improves\nAP50.\nFig. 5: Out of distribution gen-\neralization\nfor\nrare\nclasses.\nEven though no image in the\ntraining set has more than 13\ngiraﬀes, DETR has no diﬃ-\nculty generalizing to 24 and\nmore instances of the same\nclass.\nings (object queries). We experiment with various combinations of ﬁxed and\nlearned encodings, results can be found in table 3. Output positional encodings\nare required and cannot be removed, so we experiment with either passing them\nonce at decoder input or adding to queries at every decoder attention layer. In\nthe ﬁrst experiment we completely remove spatial positional encodings and pass\noutput positional encodings at input and, interestingly, the model still achieves\nmore than 32 AP, losing 7.8 AP to the baseline. Then, we pass ﬁxed sine spatial\npositional encodings and the output encodings at input once, as in the original\ntransformer [47], and ﬁnd that this leads to 1.4 AP drop compared to passing\nthe positional encodings directly in attention. Learned spatial encodings passed\nto the attentions give similar results. Surprisingly, we ﬁnd that not passing any\nspatial encodings in the encoder only leads to a minor AP drop of 1.3 AP. When\nwe pass the encodings to the attentions, they are shared across all layers, and\nthe output encodings (object queries) are always learned.\nGiven these ablations, we conclude that transformer components: the global\nself-attention in encoder, FFN, multiple decoder layers, and positional encodings,\nall signiﬁcantly contribute to the ﬁnal object detection performance.\nLoss ablations. To evaluate the importance of diﬀerent components of the\nmatching cost and the loss, we train several models turning them on and oﬀ.\nThere are three components to the loss: classiﬁcation loss, ℓ1 bounding box\ndistance loss, and GIoU [38] loss. The classiﬁcation loss is essential for training\nand cannot be turned oﬀ, so we train a model without bounding box distance\nloss, and a model without the GIoU loss, and compare with baseline, trained with\nall three losses. Results are presented in table 4. GIoU loss on its own accounts\n\nEnd-to-End Object Detection with Transformers\n13\nFig. 6: Visualizing decoder attention for every predicted object (images from COCO\nval set). Predictions are made with DETR-DC5 model. Attention scores are coded with\ndiﬀerent colors for diﬀerent objects. Decoder typically attends to object extremities,\nsuch as legs and heads. Best viewed in color.\nTable 3: Results for diﬀerent positional encodings compared to the baseline (last row),\nwhich has ﬁxed sine pos. encodings passed at every attention layer in both the encoder\nand the decoder. Learned embeddings are shared between all layers. Not using spatial\npositional encodings leads to a signiﬁcant drop in AP. Interestingly, passing them in\ndecoder only leads to a minor AP drop. All these models use learned output positional\nencodings.\nspatial pos. enc.\noutput pos. enc.\nencoder\ndecoder\ndecoder\nAP\n∆\nAP50\n∆\nnone\nnone\nlearned at input\n32.8\n-7.8\n55.2\n-6.5\nsine at input\nsine at input\nlearned at input\n39.2\n-1.4\n60.0\n-1.6\nlearned at attn.\nlearned at attn.\nlearned at attn.\n39.6\n-1.0\n60.7\n-0.9\nnone\nsine at attn.\nlearned at attn.\n39.3\n-1.3\n60.3\n-1.4\nsine at attn.\nsine at attn.\nlearned at attn.\n40.6\n-\n61.6\n-\nTable 4: Eﬀect of loss components on AP. We train two models turning oﬀℓ1 loss, and\nGIoU loss, and observe that ℓ1 gives poor results on its own, but when combined with\nGIoU improves APM and APL. Our baseline (last row) combines both losses.\nclass\nℓ1\nGIoU\nAP\n∆\nAP50\n∆\nAPS\nAPM\nAPL\n✓\n✓\n35.8\n-4.8\n57.3\n-4.4\n13.7\n39.8\n57.9\n✓\n✓\n39.9\n-0.7\n61.6\n0\n19.9\n43.2\n57.9\n✓\n✓\n✓\n40.6\n-\n61.6\n-\n19.9\n44.3\n60.2\nfor most of the model performance, losing only 0.7 AP to the baseline with\ncombined losses. Using ℓ1 without GIoU shows poor results. We only studied\n\n14\nCarion et al.\nFig. 7: Visualization of all box predictions on all images from COCO 2017 val set\nfor 20 out of total N = 100 prediction slots in DETR decoder. Each box prediction is\nrepresented as a point with the coordinates of its center in the 1-by-1 square normalized\nby each image size. The points are color-coded so that green color corresponds to small\nboxes, red to large horizontal boxes and blue to large vertical boxes. We observe that\neach slot learns to specialize on certain areas and box sizes with several operating\nmodes. We note that almost all slots have a mode of predicting large image-wide boxes\nthat are common in COCO dataset.\nsimple ablations of diﬀerent losses (using the same weighting every time), but\nother means of combining them may achieve diﬀerent results.\n4.3\nAnalysis\nDecoder output slot analysis In Fig. 7 we visualize the boxes predicted\nby diﬀerent slots for all images in COCO 2017 val set. DETR learns diﬀerent\nspecialization for each query slot. We observe that each slot has several modes of\noperation focusing on diﬀerent areas and box sizes. In particular, all slots have\nthe mode for predicting image-wide boxes (visible as the red dots aligned in the\nmiddle of the plot). We hypothesize that this is related to the distribution of\nobjects in COCO.\nGeneralization to unseen numbers of instances. Some classes in COCO\nare not well represented with many instances of the same class in the same\nimage. For example, there is no image with more than 13 giraﬀes in the training\nset. We create a synthetic image3 to verify the generalization ability of DETR\n(see Figure 5). Our model is able to ﬁnd all 24 giraﬀes on the image which\nis clearly out of distribution. This experiment conﬁrms that there is no strong\nclass-specialization in each object query.\n4.4\nDETR for panoptic segmentation\nPanoptic segmentation [19] has recently attracted a lot of attention from the\ncomputer vision community. Similarly to the extension of Faster R-CNN [37] to\nMask R-CNN [14], DETR can be naturally extended by adding a mask head on\ntop of the decoder outputs. In this section we demonstrate that such a head can\nbe used to produce panoptic segmentation [19] by treating stuﬀand thing classes\n3 Base picture credit: https://www.piqsels.com/en/public-domain-photo-jzlwu\n\nEnd-to-End Object Detection with Transformers\n15\nMulti head attention\nInput image\n(3 x H x W)\nBox embeddings\n(d x N)\nEncoded image\n(d x H/32 x W/32)\nAttention maps\n(N x M x H/32 x W/32)\nMasks logits\n(N x H/4 x W/4)\nPixel-wise argmax\nConcatenate\n2 x (Conv 3x3 + GN + ReLU)\n2x up + add\nConv 3x3 + GN + ReLU\n2x up + add\nConv 3x3 + GN + ReLU\n2x up + add\nConv 3x3 + GN + ReLU + Conv 3x3\nFPN-style CNN\nResnet features\nRes5\nRes4\nRes3\nRes2\nFig. 8: Illustration of the panoptic head. A binary mask is generated in parallel for each\ndetected object, then the masks are merged using pixel-wise argmax.\nFig. 9: Qualitative results for panoptic segmentation generated by DETR-R101. DETR\nproduces aligned mask predictions in a uniﬁed manner for things and stuﬀ.\nin a uniﬁed way. We perform our experiments on the panoptic annotations of the\nCOCO dataset that has 53 stuﬀcategories in addition to 80 things categories.\nWe train DETR to predict boxes around both stuﬀand things classes on\nCOCO, using the same recipe. Predicting boxes is required for the training to\nbe possible, since the Hungarian matching is computed using distances between\nboxes. We also add a mask head which predicts a binary mask for each of the\npredicted boxes, see Figure 8. It takes as input the output of transformer decoder\nfor each object and computes multi-head (with M heads) attention scores of this\nembedding over the output of the encoder, generating M attention heatmaps\nper object in a small resolution. To make the ﬁnal prediction and increase the\nresolution, an FPN-like architecture is used. We describe the architecture in\nmore details in the supplement. The ﬁnal resolution of the masks has stride 4\nand each mask is supervised independently using the DICE/F-1 loss [28] and\nFocal loss [23].\nThe mask head can be trained either jointly, or in a two steps process, where\nwe train DETR for boxes only, then freeze all the weights and train only the mask\nhead for 25 epochs. Experimentally, these two approaches give similar results, we\nreport results using the latter method since it results in a shorter total wall-clock\ntime training.\n\n16\nCarion et al.\nTable 5: Comparison with the state-of-the-art methods UPSNet [51] and Panoptic\nFPN [18] on the COCO val dataset We retrained PanopticFPN with the same data-\naugmentation as DETR, on a 18x schedule for fair comparison. UPSNet uses the 1x\nschedule, UPSNet-M is the version with multiscale test-time augmentations.\nModel\nBackbone\nPQ\nSQ\nRQ\nPQth SQth RQth PQst SQst RQst\nAP\nPanopticFPN++\nR50\n42.4\n79.3\n51.6\n49.2\n82.4\n58.8\n32.3\n74.8\n40.6\n37.7\nUPSnet\nR50\n42.5\n78.0\n52.5\n48.6\n79.4\n59.6\n33.4\n75.9\n41.7\n34.3\nUPSnet-M\nR50\n43.0\n79.1\n52.8\n48.9\n79.7\n59.7\n34.1\n78.2\n42.3\n34.3\nPanopticFPN++\nR101\n44.1\n79.5\n53.3\n51.0\n83.2\n60.6\n33.6\n74.0\n42.1\n39.7\nDETR\nR50\n43.4\n79.3\n53.8\n48.2\n79.8\n59.5\n36.3\n78.5\n45.3\n31.1\nDETR-DC5\nR50\n44.6\n79.8\n55.0\n49.4\n80.5\n60.6\n37.3 78.7 46.5\n31.9\nDETR-R101\nR101\n45.1 79.9 55.5\n50.5\n80.9\n61.7\n37.0\n78.5\n46.0\n33.0\nTo predict the ﬁnal panoptic segmentation we simply use an argmax over\nthe mask scores at each pixel, and assign the corresponding categories to the\nresulting masks. This procedure guarantees that the ﬁnal masks have no overlaps\nand, therefore, DETR does not require a heuristic [19] that is often used to align\ndiﬀerent masks.\nTraining details. We train DETR, DETR-DC5 and DETR-R101 models fol-\nlowing the recipe for bounding box detection to predict boxes around stuﬀand\nthings classes in COCO dataset. The new mask head is trained for 25 epochs\n(see supplementary for details). During inference we ﬁrst ﬁlter out the detection\nwith a conﬁdence below 85%, then compute the per-pixel argmax to determine\nin which mask each pixel belongs. We then collapse diﬀerent mask predictions\nof the same stuﬀcategory in one, and ﬁlter the empty ones (less than 4 pixels).\nMain results. Qualitative results are shown in Figure 9. In table 5 we compare\nour uniﬁed panoptic segmenation approach with several established methods\nthat treat things and stuﬀdiﬀerently. We report the Panoptic Quality (PQ) and\nthe break-down on things (PQth) and stuﬀ(PQst). We also report the mask\nAP (computed on the things classes), before any panoptic post-treatment (in\nour case, before taking the pixel-wise argmax). We show that DETR outper-\nforms published results on COCO-val 2017, as well as our strong PanopticFPN\nbaseline (trained with same data-augmentation as DETR, for fair comparison).\nThe result break-down shows that DETR is especially dominant on stuﬀclasses,\nand we hypothesize that the global reasoning allowed by the encoder attention\nis the key element to this result. For things class, despite a severe deﬁcit of\nup to 8 mAP compared to the baselines on the mask AP computation, DETR\nobtains competitive PQth. We also evaluated our method on the test set of the\nCOCO dataset, and obtained 46 PQ. We hope that our approach will inspire the\nexploration of fully uniﬁed models for panoptic segmentation in future work.\n\nEnd-to-End Object Detection with Transformers\n17\n5"
+    },
+    {
+      "id": "SEC-005",
+      "heading": "Conclusion",
+      "text": "We presented DETR, a new design for object detection systems based on trans-\nformers and bipartite matching loss for direct set prediction. The approach\nachieves comparable results to an optimized Faster R-CNN baseline on the chal-\nlenging COCO dataset. DETR is straightforward to implement and has a ﬂexible\narchitecture that is easily extensible to panoptic segmentation, with competitive\nresults. In addition, it achieves signiﬁcantly better performance on large objects\nthan Faster R-CNN, likely thanks to the processing of global information per-\nformed by the self-attention.\nThis new design for detectors also comes with new challenges, in particular\nregarding training, optimization and performances on small objects. Current\ndetectors required several years of improvements to cope with similar issues,\nand we expect future work to successfully address them for DETR.\n6\nAcknowledgements\nWe thank Sainbayar Sukhbaatar, Piotr Bojanowski, Natalia Neverova, David\nLopez-Paz, Guillaume Lample, Danielle Rothermel, Kaiming He, Ross Girshick,\nXinlei Chen and the whole Facebook AI Research Paris team for discussions and\nadvices without which this work would not be possible."
+    },
+    {
+      "id": "SEC-006",
+      "heading": "References",
+      "text": "1. Al-Rfou, R., Choe, D., Constant, N., Guo, M., Jones, L.: Character-level language\nmodeling with deeper self-attention. In: AAAI Conference on Artiﬁcial Intelligence\n(2019)\n2. Bahdanau, D., Cho, K., Bengio, Y.: Neural machine translation by jointly learning\nto align and translate. In: ICLR (2015)\n3. Bello, I., Zoph, B., Vaswani, A., Shlens, J., Le, Q.V.: Attention augmented convo-\nlutional networks. In: ICCV (2019)\n4. Bodla, N., Singh, B., Chellappa, R., Davis, L.S.: Soft-NMS\nimproving object\ndetection with one line of code. In: ICCV (2017)\n5. Cai, Z., Vasconcelos, N.: Cascade R-CNN: High quality object detection and in-\nstance segmentation. PAMI (2019)\n6. Chan, W., Saharia, C., Hinton, G., Norouzi, M., Jaitly, N.: Imputer: Sequence\nmodelling via imputation and dynamic programming. arXiv:2002.08926 (2020)\n7. Cordonnier, J.B., Loukas, A., Jaggi, M.: On the relationship between self-attention\nand convolutional layers. In: ICLR (2020)\n8. Devlin, J., Chang, M.W., Lee, K., Toutanova, K.: BERT: Pre-training of deep\nbidirectional transformers for language understanding. In: NAACL-HLT (2019)\n9. Erhan, D., Szegedy, C., Toshev, A., Anguelov, D.: Scalable object detection using\ndeep neural networks. In: CVPR (2014)\n10. Ghazvininejad, M., Levy, O., Liu, Y., Zettlemoyer, L.: Mask-predict: Parallel de-\ncoding of conditional masked language models. arXiv:1904.09324 (2019)\n11. Glorot, X., Bengio, Y.: Understanding the diﬃculty of training deep feedforward\nneural networks. In: AISTATS (2010)\n\n18\nCarion et al.\n12. Gu, J., Bradbury, J., Xiong, C., Li, V.O., Socher, R.: Non-autoregressive neural\nmachine translation. In: ICLR (2018)\n13. He, K., Girshick, R., Doll´ar, P.: Rethinking imagenet pre-training. In: ICCV (2019)\n14. He, K., Gkioxari, G., Doll´ar, P., Girshick, R.B.: Mask R-CNN. In: ICCV (2017)\n15. He, K., Zhang, X., Ren, S., Sun, J.: Deep residual learning for image recognition.\nIn: CVPR (2016)\n16. Hosang, J.H., Benenson, R., Schiele, B.: Learning non-maximum suppression. In:\nCVPR (2017)\n17. Hu, H., Gu, J., Zhang, Z., Dai, J., Wei, Y.: Relation networks for object detection.\nIn: CVPR (2018)\n18. Kirillov, A., Girshick, R., He, K., Doll´ar, P.: Panoptic feature pyramid networks.\nIn: CVPR (2019)\n19. Kirillov, A., He, K., Girshick, R., Rother, C., Dollar, P.: Panoptic segmentation.\nIn: CVPR (2019)\n20. Kuhn, H.W.: The hungarian method for the assignment problem (1955)\n21. Li, Y., Qi, H., Dai, J., Ji, X., Wei, Y.: Fully convolutional instance-aware semantic\nsegmentation. In: CVPR (2017)\n22. Lin, T.Y., Doll´ar, P., Girshick, R., He, K., Hariharan, B., Belongie, S.: Feature\npyramid networks for object detection. In: CVPR (2017)\n23. Lin, T.Y., Goyal, P., Girshick, R.B., He, K., Doll´ar, P.: Focal loss for dense object\ndetection. In: ICCV (2017)\n24. Lin, T.Y., Maire, M., Belongie, S., Hays, J., Perona, P., Ramanan, D., Doll´ar, P.,\nZitnick, C.L.: Microsoft COCO: Common objects in context. In: ECCV (2014)\n25. Liu, W., Anguelov, D., Erhan, D., Szegedy, C., Reed, S.E., Fu, C.Y., Berg, A.C.:\nSsd: Single shot multibox detector. In: ECCV (2016)\n26. Loshchilov, I., Hutter, F.: Decoupled weight decay regularization. In: ICLR (2017)\n27. L¨uscher, C., Beck, E., Irie, K., Kitza, M., Michel, W., Zeyer, A., Schl¨uter, R., Ney,\nH.: Rwth asr systems for librispeech: Hybrid vs attention - w/o data augmentation.\narXiv:1905.03072 (2019)\n28. Milletari, F., Navab, N., Ahmadi, S.A.: V-net: Fully convolutional neural networks\nfor volumetric medical image segmentation. In: 3DV (2016)\n29. Oord, A.v.d., Li, Y., Babuschkin, I., Simonyan, K., Vinyals, O., Kavukcuoglu, K.,\nDriessche, G.v.d., Lockhart, E., Cobo, L.C., Stimberg, F., et al.: Parallel wavenet:\nFast high-ﬁdelity speech synthesis. arXiv:1711.10433 (2017)\n30. Park, E., Berg, A.C.: Learning to decompose for object detection and instance\nsegmentation. arXiv:1511.06449 (2015)\n31. Parmar, N., Vaswani, A., Uszkoreit, J., Kaiser, L., Shazeer, N., Ku, A., Tran, D.:\nImage transformer. In: ICML (2018)\n32. Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., Killeen, T.,\nLin, Z., Gimelshein, N., Antiga, L., Desmaison, A., Kopf, A., Yang, E., DeVito, Z.,\nRaison, M., Tejani, A., Chilamkurthy, S., Steiner, B., Fang, L., Bai, J., Chintala, S.:\nPytorch: An imperative style, high-performance deep learning library. In: NeurIPS\n(2019)\n33. Pineda, L., Salvador, A., Drozdzal, M., Romero, A.: Elucidating image-to-set pre-\ndiction: An analysis of models, losses and datasets. arXiv:1904.05709 (2019)\n34. Radford, A., Wu, J., Child, R., Luan, D., Amodei, D., Sutskever, I.: Language\nmodels are unsupervised multitask learners (2019)\n35. Redmon, J., Divvala, S., Girshick, R., Farhadi, A.: You only look once: Uniﬁed,\nreal-time object detection. In: CVPR (2016)\n36. Ren, M., Zemel, R.S.: End-to-end instance segmentation with recurrent attention.\nIn: CVPR (2017)\n\nEnd-to-End Object Detection with Transformers\n19\n37. Ren, S., He, K., Girshick, R.B., Sun, J.: Faster R-CNN: Towards real-time object\ndetection with region proposal networks. PAMI (2015)\n38. Rezatoﬁghi, H., Tsoi, N., Gwak, J., Sadeghian, A., Reid, I., Savarese, S.: General-\nized intersection over union. In: CVPR (2019)\n39. Rezatoﬁghi, S.H., Kaskman, R., Motlagh, F.T., Shi, Q., Cremers, D., Leal-Taix´e,\nL., Reid, I.: Deep perm-set net: Learn to predict sets with unknown permutation\nand cardinality using deep neural networks. arXiv:1805.00613 (2018)\n40. Rezatoﬁghi, S.H., Milan, A., Abbasnejad, E., Dick, A., Reid, I., Kaskman, R.,\nCremers, D., Leal-Taix, l.: Deepsetnet: Predicting sets with deep neural networks.\nIn: ICCV (2017)\n41. Romera-Paredes, B., Torr, P.H.S.: Recurrent instance segmentation. In: ECCV\n(2015)\n42. Salvador, A., Bellver, M., Baradad, M., Marqu´es, F., Torres, J., Gir´o, X.: Recurrent\nneural networks for semantic instance segmentation. arXiv:1712.00617 (2017)\n43. Stewart, R.J., Andriluka, M., Ng, A.Y.: End-to-end people detection in crowded\nscenes. In: CVPR (2015)\n44. Sutskever, I., Vinyals, O., Le, Q.V.: Sequence to sequence learning with neural\nnetworks. In: NeurIPS (2014)\n45. Synnaeve, G., Xu, Q., Kahn, J., Grave, E., Likhomanenko, T., Pratap, V., Sri-\nram, A., Liptchinsky, V., Collobert, R.: End-to-end ASR: from supervised to semi-\nsupervised learning with modern architectures. arXiv:1911.08460 (2019)\n46. Tian, Z., Shen, C., Chen, H., He, T.: FCOS: Fully convolutional one-stage object\ndetection. In: ICCV (2019)\n47. Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.N., Kaiser,\nL., Polosukhin, I.: Attention is all you need. In: NeurIPS (2017)\n48. Vinyals, O., Bengio, S., Kudlur, M.: Order matters: Sequence to sequence for sets.\nIn: ICLR (2016)\n49. Wang, X., Girshick, R.B., Gupta, A., He, K.: Non-local neural networks. In: CVPR\n(2018)\n50. Wu, Y., Kirillov, A., Massa, F., Lo, W.Y., Girshick, R.: Detectron2. https://\ngithub.com/facebookresearch/detectron2 (2019)\n51. Xiong, Y., Liao, R., Zhao, H., Hu, R., Bai, M., Yumer, E., Urtasun, R.: Upsnet: A\nuniﬁed panoptic segmentation network. In: CVPR (2019)\n52. Zhang, S., Chi, C., Yao, Y., Lei, Z., Li, S.Z.: Bridging the gap between anchor-based\nand anchor-free detection via adaptive training sample selection. arXiv:1912.02424\n(2019)\n53. Zhou, X., Wang, D., Kr¨ahenb¨uhl, P.: Objects as points. arXiv:1904.07850 (2019)\n\n20\nCarion et al.\nA"
+    },
+    {
+      "id": "SEC-007",
+      "heading": "Appendix",
+      "text": "A.1\nPreliminaries: Multi-head attention layers\nSince our model is based on the Transformer architecture, we remind here the\ngeneral form of attention mechanisms we use for exhaustivity. The attention\nmechanism follows [47], except for the details of positional encodings (see Equa-\ntion 8) that follows [7].\nMulti-head The general form of multi-head attention with M heads of dimen-\nsion d is a function with the following signature (using d′ =\nd\nM , and giving\nmatrix/tensors sizes in underbrace)\nmh-attn : Xq\n|{z}\nd×Nq\n, Xkv\n|{z}\nd×Nkv\n,\nT\n|{z}\nM×3×d′×d\n, L\n|{z}\nd×d\n7→\n˜Xq\n|{z}\nd×Nq\n(3)\nwhere Xq is the query sequence of length Nq, Xkv is the key-value sequence of\nlength Nkv (with the same number of channels d for simplicity of exposition), T\nis the weight tensor to compute the so-called query, key and value embeddings,\nand L is a projection matrix. The output is the same size as the query sequence.\nTo ﬁx the vocabulary before giving details, multi-head self-attention (mh-s-attn)\nis the special case Xq = Xkv, i.e.\nmh-s-attn(X, T, L) = mh-attn(X, X, T, L) .\n(4)\nThe multi-head attention is simply the concatenation of M single attention\nheads followed by a projection with L. The common practice [47] is to use residual\nconnections, dropout and layer normalization. In other words, denoting ˜Xq =\nmh-attn(Xq, Xkv, T, L) and ¯¯X(q) the concatenation of attention heads, we have\nX′\nq = [attn(Xq, Xkv, T1); ...; attn(Xq, Xkv, TM)]\n(5)\n˜Xq = layernorm\n\u0000Xq + dropout(LX′\nq)\n\u0001\n,\n(6)\nwhere [;] denotes concatenation on the channel axis.\nSingle head An attention head with weight tensor T ′ ∈R3×d′×d, denoted by\nattn(Xq, Xkv, T ′), depends on additional positional encoding Pq ∈Rd×Nq and\nPkv ∈Rd×Nkv. It starts by computing so-called query, key and value embeddings\nafter adding the query and key positional encodings [7]:\n[Q; K; V ] = [T ′\n1(Xq + Pq); T ′\n2(Xkv + Pkv); T ′\n3Xkv]\n(7)\nwhere T ′ is the concatenation of T ′\n1, T ′\n2, T ′\n3. The attention weights α are then\ncomputed based on the softmax of dot products between queries and keys, so\nthat each element of the query sequence attends to all elements of the key-value\nsequence (i is a query index and j a key-value index):\nαi,j = e\n1\n√\nd′ QT\ni Kj\nZi\nwhere Zi =\nNkv\nX\nj=1\ne\n1\n√\nd′ QT\ni Kj .\n(8)\n\nEnd-to-End Object Detection with Transformers\n21\nIn our case, the positional encodings may be learnt or ﬁxed, but are shared\nacross all attention layers for a given query/key-value sequence, so we do not\nexplicitly write them as parameters of the attention. We give more details on\ntheir exact value when describing the encoder and the decoder. The ﬁnal output\nis the aggregation of values weighted by attention weights: The i-th row is given\nby attni(Xq, Xkv, T ′) = PNkv\nj=1 αi,jVj.\nFeed-forward network (FFN) layers The original transformer alternates\nmulti-head attention and so-called FFN layers [47], which are eﬀectively multi-\nlayer 1x1 convolutions, which have Md input and output channels in our case.\nThe FFN we consider is composed of two-layers of 1x1 convolutions with ReLU\nactivations. There is also a residual connection/dropout/layernorm after the two\nlayers, similarly to equation 6.\nA.2\nLosses\nFor completeness, we present in detail the losses used in our approach. All losses\nare normalized by the number of objects inside the batch. Extra care must be\ntaken for distributed training: since each GPU receives a sub-batch, it is not\nsuﬃcient to normalize by the number of objects in the local batch, since in\ngeneral the sub-batches are not balanced across GPUs. Instead, it is important\nto normalize by the total number of objects in all sub-batches.\nBox loss Similarly to [41,36], we use a soft version of Intersection over Union\nin our loss, together with a ℓ1 loss on ˆb:\nLbox(bσ(i),ˆbi) = λiouLiou(bσ(i),ˆbi) + λL1||bσ(i) −ˆbi||1 ,\n(9)\nwhere λiou, λL1 ∈R are hyperparameters and Liou(·) is the generalized IoU [38]:\nLiou(bσ(i),ˆbi) = 1 −\n\u0012|bσ(i) ∩ˆbi|\n|bσ(i) ∪ˆbi|\n−|B(bσ(i),ˆbi) \\ bσ(i) ∪ˆbi|\n|B(bσ(i),ˆbi)|\n\u0013\n.\n(10)\n|.| means “area”, and the union and intersection of box coordinates are used\nas shorthands for the boxes themselves. The areas of unions or intersections\nare computed by min / max of the linear functions of bσ(i) and ˆbi, which makes\nthe loss suﬃciently well-behaved for stochastic gradients. B(bσ(i),ˆbi) means the\nlargest box containing bσ(i),ˆbi (the areas involving B are also computed based\non min / max of linear functions of the box coordinates).\nDICE/F-1 loss [28] The DICE coeﬃcient is closely related to the Intersection\nover Union. If we denote by ˆm the raw mask logits prediction of the model, and\nm the binary target mask, the loss is deﬁned as:\nLDICE(m, ˆm) = 1 −2mσ( ˆm) + 1\nσ( ˆm) + m + 1\n(11)\nwhere σ is the sigmoid function. This loss is normalized by the number of objects.\n\n22\nCarion et al.\nA.3\nDetailed architecture\nThe detailed description of the transformer used in DETR, with positional en-\ncodings passed at every attention layer, is given in Fig. 10. Image features from\nthe CNN backbone are passed through the transformer encoder, together with\nspatial positional encoding that are added to queries and keys at every multi-\nhead self-attention layer. Then, the decoder receives queries (initially set to zero),\noutput positional encoding (object queries), and encoder memory, and produces\nthe ﬁnal set of predicted class labels and bounding boxes through multiple multi-\nhead self-attention and decoder-encoder attention. The ﬁrst self-attention layer\nin the ﬁrst decoder layer can be skipped.\nAdd & Norm\nFFN\nAdd & Norm\nMulti-Head Self-Attention\n+\n+\nK\nQ\nV\nN×\nImage features\nEncoder\nMulti-Head Self-Attention\nAdd & Norm\nMulti-Head Attention\nAdd & Norm\nFFN\nAdd & Norm\n+\n+\nK\nQ\nV\n+\n+\nK\nQ\nM×\nDecoder\nV\nSpatial positional\nencoding\nObject queries\nFFN\nFFN\nClass\nBounding Box\nFig. 10: Architecture of DETR’s transformer. Please, see Section A.3 for details.\nComputational complexity Every self-attention in the encoder has complex-\nity O(d2HW+d(HW)2): O(d′d) is the cost of computing a single query/key/value\nembeddings (and Md′ = d), while O(d′(HW)2) is the cost of computing the at-\ntention weights for one head. Other computations are negligible. In the decoder,\neach self-attention is in O(d2N +dN 2), and cross-attention between encoder and\ndecoder is in O(d2(N + HW) + dNHW), which is much lower than the encoder\nsince N ≪HW in practice.\n\nEnd-to-End Object Detection with Transformers\n23\nFLOPS computation Given that the FLOPS for Faster R-CNN depends on\nthe number of proposals in the image, we report the average number of FLOPS\nfor the ﬁrst 100 images in the COCO 2017 validation set. We compute the\nFLOPS with the tool flop count operators from Detectron2 [50]. We use it\nwithout modiﬁcations for Detectron2 models, and extend it to take batch matrix\nmultiply (bmm) into account for DETR models.\nA.4\nTraining hyperparameters\nWe train DETR using AdamW [26] with improved weight decay handling, set to\n10−4. We also apply gradient clipping, with a maximal gradient norm of 0.1. The\nbackbone and the transformers are treated slightly diﬀerently, we now discuss\nthe details for both.\nBackbone ImageNet pretrained backbone ResNet-50 is imported from Torchvi-\nsion, discarding the last classiﬁcation layer. Backbone batch normalization weights\nand statistics are frozen during training, following widely adopted practice in ob-\nject detection. We ﬁne-tune the backbone using learning rate of 10−5. We observe\nthat having the backbone learning rate roughly an order of magnitude smaller\nthan the rest of the network is important to stabilize training, especially in the\nﬁrst few epochs.\nTransformer We train the transformer with a learning rate of 10−4. Additive\ndropout of 0.1 is applied after every multi-head attention and FFN before layer\nnormalization. The weights are randomly initialized with Xavier initialization.\nLosses We use linear combination of ℓ1 and GIoU losses for bounding box re-\ngression with λL1 = 5 and λiou = 2 weights respectively. All models were trained\nwith N = 100 decoder query slots.\nBaseline Our enhanced Faster-RCNN+ baselines use GIoU [38] loss along with\nthe standard ℓ1 loss for bounding box regression. We performed a grid search\nto ﬁnd the best weights for the losses and the ﬁnal models use only GIoU loss\nwith weights 20 and 1 for box and proposal regression tasks respectively. For the\nbaselines we adopt the same data augmentation as used in DETR and train it\nwith 9× schedule (approximately 109 epochs). All other settings are identical to\nthe same models in the Detectron2 model zoo [50].\nSpatial positional encoding Encoder activations are associated with corre-\nsponding spatial positions of image features. In our model we use a ﬁxed absolute\nencoding to represent these spatial positions. We adopt a generalization of the\noriginal Transformer [47] encoding to the 2D case [31]. Speciﬁcally, for both\nspatial coordinates of each embedding we independently use d\n2 sine and cosine\nfunctions with diﬀerent frequencies. We then concatenate them to get the ﬁnal\nd channel positional encoding.\nA.5\nAdditional results\nSome extra qualitative results for the panoptic prediction of the DETR-R101\nmodel are shown in Fig.11.\n\n24\nCarion et al.\n(a) Failure case with overlapping objects. PanopticFPN misses one plane entirely, while\nDETR fails to accurately segment 3 of them.\n(b) Things masks are predicted at full resolution, which allows sharper boundaries than\nPanopticFPN\nFig. 11: Comparison of panoptic predictions. From left to right: Ground truth, Panop-\nticFPN with ResNet 101, DETR with ResNet 101\nIncreasing the number of instances By design, DETR cannot predict more\nobjects than it has query slots, i.e. 100 in our experiments. In this section,\nwe analyze the behavior of DETR when approaching this limit. We select a\ncanonical square image of a given class, repeat it on a 10×10 grid, and compute\nthe percentage of instances that are missed by the model. To test the model with\nless than 100 instances, we randomly mask some of the cells. This ensures that\nthe absolute size of the objects is the same no matter how many are visible. To\naccount for the randomness in the masking, we repeat the experiment 100 times\nwith diﬀerent masks. The results are shown in Fig.12. The behavior is similar\nacross classes, and while the model detects all instances when up to 50 are\nvisible, it then starts saturating and misses more and more instances. Notably,\nwhen the image contains all 100 instances, the model only detects 30 on average,\nwhich is less than if the image contains only 50 instances that are all detected.\nThe counter-intuitive behavior of the model is likely because the images and the\ndetections are far from the training distribution.\nNote that this test is a test of generalization out-of-distribution by design,\nsince there are very few example images with a lot of instances of a single class.\nIt is diﬃcult to disentangle, from the experiment, two types of out-of-domain\ngeneralization: the image itself vs the number of object per class. But since few\nto no COCO images contain only a lot of objects of the same class, this type\nof experiment represents our best eﬀort to understand whether query objects\noverﬁt the label and position distribution of the dataset. Overall, the experiments\nsuggests that the model does not overﬁt on these distributions since it yields\nnear-perfect detections up to 50 objects.\n\nEnd-to-End Object Detection with Transformers\n25\n20\n40\n60\n80\n100\n0\n10\n20\n30\n40\n50\n60\n70\nNumber of visible instances\n% of missed instances\ndog\nperson\napple\nFig. 12: Analysis of the number of instances of various classes missed by DETR de-\npending on how many are present in the image. We report the mean and the standard\ndeviation. As the number of instances gets close to 100, DETR starts saturating and\nmisses more and more objects\nA.6\nPyTorch inference code\nTo demonstrate the simplicity of the approach, we include inference code with\nPyTorch and Torchvision libraries in Listing 1. The code runs with Python 3.6+,\nPyTorch 1.4 and Torchvision 0.5. Note that it does not support batching, hence\nit is suitable only for inference or training with DistributedDataParallel with\none image per GPU. Also note that for clarity, this code uses learnt positional\nencodings in the encoder instead of ﬁxed, and positional encodings are added\nto the input only instead of at each transformer layer. Making these changes\nrequires going beyond PyTorch implementation of transformers, which hampers\nreadability. The entire code to reproduce the experiments will be made available\nbefore the conference.\n\n26\nCarion et al.\n1\nimport torch\n2\nfrom torch import nn\n3\nfrom torchvision.models import resnet50\n4\n5\nclass DETR(nn.Module):\n6\n7\ndef __init__(self, num_classes, hidden_dim, nheads,\n8\nnum_encoder_layers, num_decoder_layers):\n9\nsuper().__init__()\n10\n# We take only convolutional layers from ResNet-50 model\n11\nself.backbone = nn.Sequential(*list(resnet50(pretrained=True).children())[:-2])\n12\nself.conv = nn.Conv2d(2048, hidden_dim, 1)\n13\nself.transformer = nn.Transformer(hidden_dim, nheads,\n14\nnum_encoder_layers, num_decoder_layers)\n15\nself.linear_class = nn.Linear(hidden_dim, num_classes + 1)\n16\nself.linear_bbox = nn.Linear(hidden_dim, 4)\n17\nself.query_pos = nn.Parameter(torch.rand(100, hidden_dim))\n18\nself.row_embed = nn.Parameter(torch.rand(50, hidden_dim // 2))\n19\nself.col_embed = nn.Parameter(torch.rand(50, hidden_dim // 2))\n20\n21\ndef forward(self, inputs):\n22\nx = self.backbone(inputs)\n23\nh = self.conv(x)\n24\nH, W = h.shape[-2:]\n25\npos = torch.cat([\n26\nself.col_embed[:W].unsqueeze(0).repeat(H, 1, 1),\n27\nself.row_embed[:H].unsqueeze(1).repeat(1, W, 1),\n28\n], dim=-1).flatten(0, 1).unsqueeze(1)\n29\nh = self.transformer(pos + h.flatten(2).permute(2, 0, 1),\n30\nself.query_pos.unsqueeze(1))\n31\nreturn self.linear_class(h), self.linear_bbox(h).sigmoid()\n32\n33\ndetr = DETR(num_classes=91, hidden_dim=256, nheads=8, num_encoder_layers=6, num_decoder_layers=6)\n34\ndetr.eval()\n35\ninputs = torch.randn(1, 3, 800, 1200)\n36\nlogits, bboxes = detr(inputs)\nListing 1: DETR PyTorch inference code. For clarity it uses learnt positional encod-\nings in the encoder instead of ﬁxed, and positional encodings are added to the input\nonly instead of at each transformer layer. Making these changes requires going beyond\nPyTorch implementation of transformers, which hampers readability. The entire code\nto reproduce the experiments will be made available before the conference."
+    }
+  ],
+  "tables": [
+    {
+      "id": "TABLE 5",
+      "rows": [
+        {
+          "header": "Resnet features",
+          "cells": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Resne",
+            "",
+            "t featu",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "header": "Resnet features",
+          "cells": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Res5 Res4 Res3 Res2",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "header": "Resnet features",
+          "cells": [
+            "",
+            "Multi head attention",
+            "",
+            "",
+            "",
+            "2 x (Conv 3x3 + GN + ReLU) Concatenate",
+            "2x up + add",
+            "Conv 3x3 + GN + ReLU",
+            "2x up + add",
+            "Conv 3x3 + GN + ReLU",
+            "2x up + add",
+            "",
+            "Conv 3x3 + GN + ReLU + Conv 3x3",
+            "",
+            ""
+          ]
+        },
+        {
+          "header": "Resnet features",
+          "cells": [
+            "Box embedding",
+            "s",
+            "Atte",
+            "",
+            "ntion maps",
+            "",
+            "FPN-style CNN",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Masks log",
+            "its"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TABLE 7",
+      "rows": [
+        {
+          "header": "Model Backbone PQ SQ RQ PQth SQth RQth PQst SQst RQst AP",
+          "cells": [
+            "PanopticFPN++ R50\nUPSnet R50\nUPSnet-M R50\nPanopticFPN++ R101\nDETR R50\nDETR-DC5 R50\nDETR-R101 R101",
+            "42.4 79.3 51.6\n42.5 78.0 52.5\n43.0 79.1 52.8\n44.1 79.5 53.3\n43.4 79.3 53.8\n44.6 79.8 55.0\n45.1 79.9 55.5",
+            "49.2 82.4 58.8\n48.6 79.4 59.6\n48.9 79.7 59.7\n51.0 83.2 60.6\n48.2 79.8 59.5\n49.4 80.5 60.6\n50.5 80.9 61.7",
+            "32.3 74.8 40.6\n33.4 75.9 41.7\n34.1 78.2 42.3\n33.6 74.0 42.1\n36.3 78.5 45.3\n37.3 78.7 46.5\n37.0 78.5 46.0",
+            "37.7\n34.3\n34.3\n39.7\n31.1\n31.9\n33.0"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TABLE 8",
+      "rows": [
+        {
+          "header": "d og",
+          "cells": [
+            "",
+            "d",
+            "",
+            "og",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "header": "d og",
+          "cells": [
+            "",
+            "p\na",
+            "",
+            "erson\npple",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        }
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "metric_id": "M-000",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP",
+      "metric_variant": "AP",
+      "value": 39.0,
+      "direction": "higher",
+      "method_key": "Faster RCNN-DC5",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-001",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP50",
+      "metric_variant": "AP50",
+      "value": 60.5,
+      "direction": "higher",
+      "method_key": "Faster RCNN-DC5",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-002",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP75",
+      "metric_variant": "AP75",
+      "value": 42.3,
+      "direction": "higher",
+      "method_key": "Faster RCNN-DC5",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-003",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APS",
+      "metric_variant": "APS",
+      "value": 21.4,
+      "direction": "higher",
+      "method_key": "Faster RCNN-DC5",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-004",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APM",
+      "metric_variant": "APM",
+      "value": 43.5,
+      "direction": "higher",
+      "method_key": "Faster RCNN-DC5",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-005",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APL",
+      "metric_variant": "APL",
+      "value": 52.5,
+      "direction": "higher",
+      "method_key": "Faster RCNN-DC5",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-006",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP",
+      "metric_variant": "AP",
+      "value": 40.2,
+      "direction": "higher",
+      "method_key": "Faster RCNN-FPN",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-007",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP50",
+      "metric_variant": "AP50",
+      "value": 61.0,
+      "direction": "higher",
+      "method_key": "Faster RCNN-FPN",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-008",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP75",
+      "metric_variant": "AP75",
+      "value": 43.8,
+      "direction": "higher",
+      "method_key": "Faster RCNN-FPN",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-009",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APS",
+      "metric_variant": "APS",
+      "value": 24.2,
+      "direction": "higher",
+      "method_key": "Faster RCNN-FPN",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-010",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APM",
+      "metric_variant": "APM",
+      "value": 43.5,
+      "direction": "higher",
+      "method_key": "Faster RCNN-FPN",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-011",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APL",
+      "metric_variant": "APL",
+      "value": 52.0,
+      "direction": "higher",
+      "method_key": "Faster RCNN-FPN",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-012",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP",
+      "metric_variant": "AP",
+      "value": 42.0,
+      "direction": "higher",
+      "method_key": "Faster RCNN-R101-FPN",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-013",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP50",
+      "metric_variant": "AP50",
+      "value": 62.5,
+      "direction": "higher",
+      "method_key": "Faster RCNN-R101-FPN",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-014",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP75",
+      "metric_variant": "AP75",
+      "value": 45.9,
+      "direction": "higher",
+      "method_key": "Faster RCNN-R101-FPN",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-015",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APS",
+      "metric_variant": "APS",
+      "value": 25.2,
+      "direction": "higher",
+      "method_key": "Faster RCNN-R101-FPN",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-016",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APM",
+      "metric_variant": "APM",
+      "value": 45.6,
+      "direction": "higher",
+      "method_key": "Faster RCNN-R101-FPN",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-017",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APL",
+      "metric_variant": "APL",
+      "value": 54.6,
+      "direction": "higher",
+      "method_key": "Faster RCNN-R101-FPN",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-018",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP",
+      "metric_variant": "AP",
+      "value": 41.1,
+      "direction": "higher",
+      "method_key": "Faster RCNN-DC5+",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-019",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP50",
+      "metric_variant": "AP50",
+      "value": 61.4,
+      "direction": "higher",
+      "method_key": "Faster RCNN-DC5+",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-020",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP75",
+      "metric_variant": "AP75",
+      "value": 44.3,
+      "direction": "higher",
+      "method_key": "Faster RCNN-DC5+",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-021",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APS",
+      "metric_variant": "APS",
+      "value": 22.9,
+      "direction": "higher",
+      "method_key": "Faster RCNN-DC5+",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-022",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APM",
+      "metric_variant": "APM",
+      "value": 45.9,
+      "direction": "higher",
+      "method_key": "Faster RCNN-DC5+",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-023",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APL",
+      "metric_variant": "APL",
+      "value": 55.0,
+      "direction": "higher",
+      "method_key": "Faster RCNN-DC5+",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-024",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP",
+      "metric_variant": "AP",
+      "value": 42.0,
+      "direction": "higher",
+      "method_key": "Faster RCNN-FPN+",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-025",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP50",
+      "metric_variant": "AP50",
+      "value": 62.1,
+      "direction": "higher",
+      "method_key": "Faster RCNN-FPN+",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-026",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP75",
+      "metric_variant": "AP75",
+      "value": 45.5,
+      "direction": "higher",
+      "method_key": "Faster RCNN-FPN+",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-027",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APS",
+      "metric_variant": "APS",
+      "value": 26.6,
+      "direction": "higher",
+      "method_key": "Faster RCNN-FPN+",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-028",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APM",
+      "metric_variant": "APM",
+      "value": 45.9,
+      "direction": "higher",
+      "method_key": "Faster RCNN-FPN+",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-029",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APL",
+      "metric_variant": "APL",
+      "value": 54.6,
+      "direction": "higher",
+      "method_key": "Faster RCNN-FPN+",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-030",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP",
+      "metric_variant": "AP",
+      "value": 42.0,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-031",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP50",
+      "metric_variant": "AP50",
+      "value": 62.4,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-032",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP75",
+      "metric_variant": "AP75",
+      "value": 44.2,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-033",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APS",
+      "metric_variant": "APS",
+      "value": 20.5,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-034",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APM",
+      "metric_variant": "APM",
+      "value": 45.8,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-035",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APL",
+      "metric_variant": "APL",
+      "value": 61.1,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-036",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP",
+      "metric_variant": "AP",
+      "value": 43.3,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-037",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP50",
+      "metric_variant": "AP50",
+      "value": 63.1,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-038",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP75",
+      "metric_variant": "AP75",
+      "value": 45.9,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-039",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APS",
+      "metric_variant": "APS",
+      "value": 21.9,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-040",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APM",
+      "metric_variant": "APM",
+      "value": 46.2,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-041",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APL",
+      "metric_variant": "APL",
+      "value": 61.9,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-042",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP",
+      "metric_variant": "AP",
+      "value": 44.9,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-043",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP50",
+      "metric_variant": "AP50",
+      "value": 64.3,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-044",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP75",
+      "metric_variant": "AP75",
+      "value": 47.7,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-045",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APS",
+      "metric_variant": "APS",
+      "value": 23.7,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-046",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APM",
+      "metric_variant": "APM",
+      "value": 49.5,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-047",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APL",
+      "metric_variant": "APL",
+      "value": 63.8,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-048",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP",
+      "metric_variant": "AP",
+      "value": 45.4,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-049",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP50",
+      "metric_variant": "AP50",
+      "value": 64.7,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-050",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP75",
+      "metric_variant": "AP75",
+      "value": 48.0,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-051",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APS",
+      "metric_variant": "APS",
+      "value": 24.0,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-052",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APM",
+      "metric_variant": "APM",
+      "value": 49.0,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-053",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APL",
+      "metric_variant": "APL",
+      "value": 64.5,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-054",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP",
+      "metric_variant": "AP",
+      "value": 46.2,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-055",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP50",
+      "metric_variant": "AP50",
+      "value": 65.2,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-056",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "AP75",
+      "metric_variant": "AP75",
+      "value": 49.0,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-057",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APS",
+      "metric_variant": "APS",
+      "value": 25.1,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-058",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APM",
+      "metric_variant": "APM",
+      "value": 50.0,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    },
+    {
+      "metric_id": "M-059",
+      "task": "object detection",
+      "dataset": "COCO",
+      "metric_name": "APL",
+      "metric_variant": "APL",
+      "value": 65.8,
+      "direction": "higher",
+      "method_key": "Ours",
+      "source_location": "Table 1",
+      "normalization_note": ""
+    }
+  ],
+  "comparisons": [
+    {
+      "comparison_id": "CMP-001",
+      "metric_ids": [
+        "M-030",
+        "M-000"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +3.00 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-002",
+      "metric_ids": [
+        "M-030",
+        "M-006"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +1.80 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-003",
+      "metric_ids": [
+        "M-030",
+        "M-012"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +0.00 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-004",
+      "metric_ids": [
+        "M-030",
+        "M-018"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +0.90 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-005",
+      "metric_ids": [
+        "M-030",
+        "M-024"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +0.00 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-006",
+      "metric_ids": [
+        "M-036",
+        "M-000"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +4.30 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-007",
+      "metric_ids": [
+        "M-036",
+        "M-006"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +3.10 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-008",
+      "metric_ids": [
+        "M-036",
+        "M-012"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +1.30 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-009",
+      "metric_ids": [
+        "M-036",
+        "M-018"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +2.20 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-010",
+      "metric_ids": [
+        "M-036",
+        "M-024"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +1.30 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-011",
+      "metric_ids": [
+        "M-042",
+        "M-000"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +5.90 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-012",
+      "metric_ids": [
+        "M-042",
+        "M-006"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +4.70 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-013",
+      "metric_ids": [
+        "M-042",
+        "M-012"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +2.90 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-014",
+      "metric_ids": [
+        "M-042",
+        "M-018"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +3.80 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-015",
+      "metric_ids": [
+        "M-042",
+        "M-024"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +2.90 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-016",
+      "metric_ids": [
+        "M-048",
+        "M-000"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +6.40 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-017",
+      "metric_ids": [
+        "M-048",
+        "M-006"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +5.20 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-018",
+      "metric_ids": [
+        "M-048",
+        "M-012"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +3.40 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-019",
+      "metric_ids": [
+        "M-048",
+        "M-018"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +4.30 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-020",
+      "metric_ids": [
+        "M-048",
+        "M-024"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +3.40 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-021",
+      "metric_ids": [
+        "M-054",
+        "M-000"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +7.20 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-022",
+      "metric_ids": [
+        "M-054",
+        "M-006"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +6.00 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-023",
+      "metric_ids": [
+        "M-054",
+        "M-012"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +4.20 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-024",
+      "metric_ids": [
+        "M-054",
+        "M-018"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +5.10 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-025",
+      "metric_ids": [
+        "M-054",
+        "M-024"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP +4.20 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-026",
+      "metric_ids": [
+        "M-031",
+        "M-001"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +1.90 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-027",
+      "metric_ids": [
+        "M-031",
+        "M-007"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +1.40 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-028",
+      "metric_ids": [
+        "M-031",
+        "M-013"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 -0.10 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-029",
+      "metric_ids": [
+        "M-031",
+        "M-019"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +1.00 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-030",
+      "metric_ids": [
+        "M-031",
+        "M-025"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +0.30 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-031",
+      "metric_ids": [
+        "M-037",
+        "M-001"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +2.60 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-032",
+      "metric_ids": [
+        "M-037",
+        "M-007"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +2.10 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-033",
+      "metric_ids": [
+        "M-037",
+        "M-013"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +0.60 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-034",
+      "metric_ids": [
+        "M-037",
+        "M-019"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +1.70 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-035",
+      "metric_ids": [
+        "M-037",
+        "M-025"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +1.00 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-036",
+      "metric_ids": [
+        "M-043",
+        "M-001"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +3.80 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-037",
+      "metric_ids": [
+        "M-043",
+        "M-007"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +3.30 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-038",
+      "metric_ids": [
+        "M-043",
+        "M-013"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +1.80 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-039",
+      "metric_ids": [
+        "M-043",
+        "M-019"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +2.90 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-040",
+      "metric_ids": [
+        "M-043",
+        "M-025"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +2.20 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-041",
+      "metric_ids": [
+        "M-049",
+        "M-001"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +4.20 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-042",
+      "metric_ids": [
+        "M-049",
+        "M-007"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +3.70 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-043",
+      "metric_ids": [
+        "M-049",
+        "M-013"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +2.20 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-044",
+      "metric_ids": [
+        "M-049",
+        "M-019"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +3.30 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-045",
+      "metric_ids": [
+        "M-049",
+        "M-025"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +2.60 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-046",
+      "metric_ids": [
+        "M-055",
+        "M-001"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +4.70 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-047",
+      "metric_ids": [
+        "M-055",
+        "M-007"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +4.20 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-048",
+      "metric_ids": [
+        "M-055",
+        "M-013"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +2.70 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-049",
+      "metric_ids": [
+        "M-055",
+        "M-019"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +3.80 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-050",
+      "metric_ids": [
+        "M-055",
+        "M-025"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP50 +3.10 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-051",
+      "metric_ids": [
+        "M-032",
+        "M-002"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +1.90 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-052",
+      "metric_ids": [
+        "M-032",
+        "M-008"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +0.40 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-053",
+      "metric_ids": [
+        "M-032",
+        "M-014"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 -1.70 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-054",
+      "metric_ids": [
+        "M-032",
+        "M-020"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 -0.10 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-055",
+      "metric_ids": [
+        "M-032",
+        "M-026"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 -1.30 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-056",
+      "metric_ids": [
+        "M-038",
+        "M-002"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +3.60 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-057",
+      "metric_ids": [
+        "M-038",
+        "M-008"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +2.10 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-058",
+      "metric_ids": [
+        "M-038",
+        "M-014"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +0.00 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-059",
+      "metric_ids": [
+        "M-038",
+        "M-020"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +1.60 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-060",
+      "metric_ids": [
+        "M-038",
+        "M-026"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +0.40 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-061",
+      "metric_ids": [
+        "M-044",
+        "M-002"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +5.40 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-062",
+      "metric_ids": [
+        "M-044",
+        "M-008"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +3.90 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-063",
+      "metric_ids": [
+        "M-044",
+        "M-014"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +1.80 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-064",
+      "metric_ids": [
+        "M-044",
+        "M-020"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +3.40 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-065",
+      "metric_ids": [
+        "M-044",
+        "M-026"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +2.20 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-066",
+      "metric_ids": [
+        "M-050",
+        "M-002"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +5.70 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-067",
+      "metric_ids": [
+        "M-050",
+        "M-008"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +4.20 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-068",
+      "metric_ids": [
+        "M-050",
+        "M-014"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +2.10 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-069",
+      "metric_ids": [
+        "M-050",
+        "M-020"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +3.70 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-070",
+      "metric_ids": [
+        "M-050",
+        "M-026"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +2.50 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-071",
+      "metric_ids": [
+        "M-056",
+        "M-002"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +6.70 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-072",
+      "metric_ids": [
+        "M-056",
+        "M-008"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +5.20 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-073",
+      "metric_ids": [
+        "M-056",
+        "M-014"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +3.10 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-074",
+      "metric_ids": [
+        "M-056",
+        "M-020"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +4.70 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-075",
+      "metric_ids": [
+        "M-056",
+        "M-026"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "AP75 +3.50 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-076",
+      "metric_ids": [
+        "M-035",
+        "M-005"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +8.60 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-077",
+      "metric_ids": [
+        "M-035",
+        "M-011"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +9.10 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-078",
+      "metric_ids": [
+        "M-035",
+        "M-017"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +6.50 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-079",
+      "metric_ids": [
+        "M-035",
+        "M-023"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +6.10 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-080",
+      "metric_ids": [
+        "M-035",
+        "M-029"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +6.50 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-081",
+      "metric_ids": [
+        "M-041",
+        "M-005"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +9.40 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-082",
+      "metric_ids": [
+        "M-041",
+        "M-011"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +9.90 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-083",
+      "metric_ids": [
+        "M-041",
+        "M-017"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +7.30 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-084",
+      "metric_ids": [
+        "M-041",
+        "M-023"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +6.90 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-085",
+      "metric_ids": [
+        "M-041",
+        "M-029"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +7.30 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-086",
+      "metric_ids": [
+        "M-047",
+        "M-005"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +11.30 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-087",
+      "metric_ids": [
+        "M-047",
+        "M-011"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +11.80 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-088",
+      "metric_ids": [
+        "M-047",
+        "M-017"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +9.20 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-089",
+      "metric_ids": [
+        "M-047",
+        "M-023"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +8.80 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-090",
+      "metric_ids": [
+        "M-047",
+        "M-029"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +9.20 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-091",
+      "metric_ids": [
+        "M-053",
+        "M-005"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +12.00 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-092",
+      "metric_ids": [
+        "M-053",
+        "M-011"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +12.50 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-093",
+      "metric_ids": [
+        "M-053",
+        "M-017"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +9.90 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-094",
+      "metric_ids": [
+        "M-053",
+        "M-023"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +9.50 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-095",
+      "metric_ids": [
+        "M-053",
+        "M-029"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +9.90 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-096",
+      "metric_ids": [
+        "M-059",
+        "M-005"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +13.30 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-097",
+      "metric_ids": [
+        "M-059",
+        "M-011"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +13.80 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-098",
+      "metric_ids": [
+        "M-059",
+        "M-017"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +11.20 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-099",
+      "metric_ids": [
+        "M-059",
+        "M-023"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +10.80 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-100",
+      "metric_ids": [
+        "M-059",
+        "M-029"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APL +11.20 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-101",
+      "metric_ids": [
+        "M-034",
+        "M-004"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +2.30 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-102",
+      "metric_ids": [
+        "M-034",
+        "M-010"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +2.30 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-103",
+      "metric_ids": [
+        "M-034",
+        "M-016"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +0.20 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-104",
+      "metric_ids": [
+        "M-034",
+        "M-022"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM -0.10 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-105",
+      "metric_ids": [
+        "M-034",
+        "M-028"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM -0.10 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-106",
+      "metric_ids": [
+        "M-040",
+        "M-004"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +2.70 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-107",
+      "metric_ids": [
+        "M-040",
+        "M-010"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +2.70 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-108",
+      "metric_ids": [
+        "M-040",
+        "M-016"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +0.60 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-109",
+      "metric_ids": [
+        "M-040",
+        "M-022"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +0.30 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-110",
+      "metric_ids": [
+        "M-040",
+        "M-028"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +0.30 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-111",
+      "metric_ids": [
+        "M-046",
+        "M-004"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +6.00 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-112",
+      "metric_ids": [
+        "M-046",
+        "M-010"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +6.00 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-113",
+      "metric_ids": [
+        "M-046",
+        "M-016"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +3.90 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-114",
+      "metric_ids": [
+        "M-046",
+        "M-022"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +3.60 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-115",
+      "metric_ids": [
+        "M-046",
+        "M-028"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +3.60 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-116",
+      "metric_ids": [
+        "M-052",
+        "M-004"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +5.50 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-117",
+      "metric_ids": [
+        "M-052",
+        "M-010"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +5.50 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-118",
+      "metric_ids": [
+        "M-052",
+        "M-016"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +3.40 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-119",
+      "metric_ids": [
+        "M-052",
+        "M-022"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +3.10 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-120",
+      "metric_ids": [
+        "M-052",
+        "M-028"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +3.10 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-121",
+      "metric_ids": [
+        "M-058",
+        "M-004"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +6.50 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-122",
+      "metric_ids": [
+        "M-058",
+        "M-010"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +6.50 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-123",
+      "metric_ids": [
+        "M-058",
+        "M-016"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +4.40 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-124",
+      "metric_ids": [
+        "M-058",
+        "M-022"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +4.10 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-125",
+      "metric_ids": [
+        "M-058",
+        "M-028"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APM +4.10 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-126",
+      "metric_ids": [
+        "M-033",
+        "M-003"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -0.90 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-127",
+      "metric_ids": [
+        "M-033",
+        "M-009"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -3.70 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-128",
+      "metric_ids": [
+        "M-033",
+        "M-015"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -4.70 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-129",
+      "metric_ids": [
+        "M-033",
+        "M-021"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -2.40 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-130",
+      "metric_ids": [
+        "M-033",
+        "M-027"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -6.10 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-131",
+      "metric_ids": [
+        "M-039",
+        "M-003"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS +0.50 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-132",
+      "metric_ids": [
+        "M-039",
+        "M-009"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -2.30 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-133",
+      "metric_ids": [
+        "M-039",
+        "M-015"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -3.30 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-134",
+      "metric_ids": [
+        "M-039",
+        "M-021"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -1.00 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-135",
+      "metric_ids": [
+        "M-039",
+        "M-027"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -4.70 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-136",
+      "metric_ids": [
+        "M-045",
+        "M-003"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS +2.30 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-137",
+      "metric_ids": [
+        "M-045",
+        "M-009"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -0.50 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-138",
+      "metric_ids": [
+        "M-045",
+        "M-015"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -1.50 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-139",
+      "metric_ids": [
+        "M-045",
+        "M-021"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS +0.80 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-140",
+      "metric_ids": [
+        "M-045",
+        "M-027"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -2.90 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-141",
+      "metric_ids": [
+        "M-051",
+        "M-003"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS +2.60 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-142",
+      "metric_ids": [
+        "M-051",
+        "M-009"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -0.20 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-143",
+      "metric_ids": [
+        "M-051",
+        "M-015"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -1.20 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-144",
+      "metric_ids": [
+        "M-051",
+        "M-021"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS +1.10 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-145",
+      "metric_ids": [
+        "M-051",
+        "M-027"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -2.60 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-146",
+      "metric_ids": [
+        "M-057",
+        "M-003"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS +3.70 vs Faster RCNN-DC5 (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-147",
+      "metric_ids": [
+        "M-057",
+        "M-009"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS +0.90 vs Faster RCNN-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-148",
+      "metric_ids": [
+        "M-057",
+        "M-015"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -0.10 vs Faster RCNN-R101-FPN (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-149",
+      "metric_ids": [
+        "M-057",
+        "M-021"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS +2.20 vs Faster RCNN-DC5+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-150",
+      "metric_ids": [
+        "M-057",
+        "M-027"
+      ],
+      "type": "vs_baseline",
+      "conclusion": "APS -1.50 vs Faster RCNN-FPN+ (COCO)",
+      "evidence_locations": [
+        "Table 1",
+        "Table 1"
+      ]
+    },
+    {
+      "comparison_id": "CMP-151",
+      "metric_ids": [],
+      "type": "coverage",
+      "conclusion": "covers 1 datasets: COCO",
+      "evidence_locations": []
+    },
+    {
+      "comparison_id": "CMP-152",
+      "metric_ids": [
+        "M-000",
+        "M-001",
+        "M-002",
+        "M-003",
+        "M-004",
+        "M-005",
+        "M-006",
+        "M-007",
+        "M-008",
+        "M-009",
+        "M-010",
+        "M-011",
+        "M-012",
+        "M-013",
+        "M-014",
+        "M-015",
+        "M-016",
+        "M-017",
+        "M-018",
+        "M-019",
+        "M-020",
+        "M-021",
+        "M-022",
+        "M-023",
+        "M-024",
+        "M-025",
+        "M-026",
+        "M-027",
+        "M-028",
+        "M-029",
+        "M-030",
+        "M-031",
+        "M-032",
+        "M-033",
+        "M-034",
+        "M-035",
+        "M-036",
+        "M-037",
+        "M-038",
+        "M-039",
+        "M-040",
+        "M-041",
+        "M-042",
+        "M-043",
+        "M-044",
+        "M-045",
+        "M-046",
+        "M-047",
+        "M-048",
+        "M-049",
+        "M-050",
+        "M-051",
+        "M-052",
+        "M-053",
+        "M-054",
+        "M-055",
+        "M-056",
+        "M-057",
+        "M-058",
+        "M-059"
+      ],
+      "type": "statistics",
+      "conclusion": "no variance/std disclosure detected",
+      "evidence_locations": []
+    }
+  ],
+  "dimension_scores": [
+    {
+      "cluster_id": "CL-001",
+      "dimension": "创新性/新颖性",
+      "score": 5.0,
+      "confidence": "high",
+      "evidence": [
+        "We present a new method that views object detection as a direct set prediction problem.",
+        "Our approach streamlines the detection pipeline, effectively removing the need for many hand-designed components like a non-maximum suppression procedure or anchor generation that explicitly encode our prior knowledge about the task.",
+        "The main ingredients of the new framework, called DEtection TRansformer or DETR, are a set-based global loss that forces unique predictions via bipartite matching, and a transformer encoder-decoder architecture.",
+        "Compared to most previous work on direct set prediction, the main features of DETR are the conjunction of the bipartite matching loss and transformers with (non-autoregressive) parallel decoding.",
+        "In contrast, previous work focused on autoregressive decoding with RNNs."
+      ],
+      "status": "evaluated"
+    },
+    {
+      "cluster_id": "CL-003",
+      "dimension": "学术贡献度",
+      "score": 5.0,
+      "confidence": "high",
+      "evidence": [
+        "The main ingredients of the new framework, called DEtection TRansformer or DETR, are a set-based global loss that forces unique predictions via bipartite matching, and a transformer encoder-decoder architecture.",
+        "Given a fixed small set of learned object queries, DETR reasons about the relations of the objects and the global image context to directly output the final set of predictions in parallel.",
+        "The new model is conceptually simple and does not require a specialized library, unlike many other modern detectors.",
+        "The design ethos of DETR easily extend to more complex tasks."
+      ],
+      "status": "evaluated"
+    },
+    {
+      "cluster_id": "CL-004",
+      "dimension": "技术稳健性",
+      "score": 4.0,
+      "confidence": "high",
+      "evidence": [
+        "AP +3.00 vs Faster RCNN-DC5 (COCO)",
+        "AP +1.80 vs Faster RCNN-FPN (COCO)",
+        "AP +0.00 vs Faster RCNN-R101-FPN (COCO)",
+        "AP +0.90 vs Faster RCNN-DC5+ (COCO)",
+        "AP +0.00 vs Faster RCNN-FPN+ (COCO)",
+        "AP +4.30 vs Faster RCNN-DC5 (COCO)",
+        "AP +3.10 vs Faster RCNN-FPN (COCO)",
+        "AP +1.30 vs Faster RCNN-R101-FPN (COCO)",
+        "AP +2.20 vs Faster RCNN-DC5+ (COCO)",
+        "AP +1.30 vs Faster RCNN-FPN+ (COCO)",
+        "AP +5.90 vs Faster RCNN-DC5 (COCO)",
+        "AP +4.70 vs Faster RCNN-FPN (COCO)",
+        "AP +2.90 vs Faster RCNN-R101-FPN (COCO)",
+        "AP +3.80 vs Faster RCNN-DC5+ (COCO)",
+        "AP +2.90 vs Faster RCNN-FPN+ (COCO)",
+        "AP +6.40 vs Faster RCNN-DC5 (COCO)",
+        "AP +5.20 vs Faster RCNN-FPN (COCO)",
+        "AP +3.40 vs Faster RCNN-R101-FPN (COCO)",
+        "AP +4.30 vs Faster RCNN-DC5+ (COCO)",
+        "AP +3.40 vs Faster RCNN-FPN+ (COCO)",
+        "AP +7.20 vs Faster RCNN-DC5 (COCO)",
+        "AP +6.00 vs Faster RCNN-FPN (COCO)",
+        "AP +4.20 vs Faster RCNN-R101-FPN (COCO)",
+        "AP +5.10 vs Faster RCNN-DC5+ (COCO)",
+        "AP +4.20 vs Faster RCNN-FPN+ (COCO)",
+        "It obtains, however, lower performances on small objects."
+      ],
+      "status": "evaluated"
+    },
+    {
+      "cluster_id": "CL-005",
+      "dimension": "声明-证据一致性",
+      "score": 5.0,
+      "confidence": "high",
+      "evidence": [
+        "AP +3.00 vs Faster RCNN-DC5 (COCO)",
+        "AP +1.80 vs Faster RCNN-FPN (COCO)",
+        "AP +0.00 vs Faster RCNN-R101-FPN (COCO)",
+        "AP +0.90 vs Faster RCNN-DC5+ (COCO)",
+        "AP +0.00 vs Faster RCNN-FPN+ (COCO)",
+        "AP +4.30 vs Faster RCNN-DC5 (COCO)",
+        "AP +3.10 vs Faster RCNN-FPN (COCO)",
+        "AP +1.30 vs Faster RCNN-R101-FPN (COCO)",
+        "AP +2.20 vs Faster RCNN-DC5+ (COCO)",
+        "AP +1.30 vs Faster RCNN-FPN+ (COCO)",
+        "AP +5.90 vs Faster RCNN-DC5 (COCO)",
+        "AP +4.70 vs Faster RCNN-FPN (COCO)",
+        "AP +2.90 vs Faster RCNN-R101-FPN (COCO)",
+        "AP +3.80 vs Faster RCNN-DC5+ (COCO)",
+        "AP +2.90 vs Faster RCNN-FPN+ (COCO)",
+        "AP +6.40 vs Faster RCNN-DC5 (COCO)",
+        "AP +5.20 vs Faster RCNN-FPN (COCO)",
+        "AP +3.40 vs Faster RCNN-R101-FPN (COCO)",
+        "AP +4.30 vs Faster RCNN-DC5+ (COCO)",
+        "AP +3.40 vs Faster RCNN-FPN+ (COCO)",
+        "AP +7.20 vs Faster RCNN-DC5 (COCO)",
+        "AP +6.00 vs Faster RCNN-FPN (COCO)",
+        "AP +4.20 vs Faster RCNN-R101-FPN (COCO)",
+        "AP +5.10 vs Faster RCNN-DC5+ (COCO)",
+        "AP +4.20 vs Faster RCNN-FPN+ (COCO)",
+        "It obtains, however, lower performances on small objects."
+      ],
+      "status": "evaluated"
+    },
+    {
+      "cluster_id": "CL-006",
+      "dimension": "实验有效性与偏置控制",
+      "score": 4.0,
+      "confidence": "high",
+      "evidence": [
+        "AP +3.00 vs Faster RCNN-DC5 (COCO)",
+        "AP +1.80 vs Faster RCNN-FPN (COCO)",
+        "AP +0.00 vs Faster RCNN-R101-FPN (COCO)",
+        "AP +0.90 vs Faster RCNN-DC5+ (COCO)",
+        "AP +0.00 vs Faster RCNN-FPN+ (COCO)",
+        "AP +4.30 vs Faster RCNN-DC5 (COCO)",
+        "AP +3.10 vs Faster RCNN-FPN (COCO)",
+        "AP +1.30 vs Faster RCNN-R101-FPN (COCO)",
+        "AP +2.20 vs Faster RCNN-DC5+ (COCO)",
+        "AP +1.30 vs Faster RCNN-FPN+ (COCO)",
+        "AP +5.90 vs Faster RCNN-DC5 (COCO)",
+        "AP +4.70 vs Faster RCNN-FPN (COCO)",
+        "AP +2.90 vs Faster RCNN-R101-FPN (COCO)",
+        "AP +3.80 vs Faster RCNN-DC5+ (COCO)",
+        "AP +2.90 vs Faster RCNN-FPN+ (COCO)",
+        "AP +6.40 vs Faster RCNN-DC5 (COCO)",
+        "AP +5.20 vs Faster RCNN-FPN (COCO)",
+        "AP +3.40 vs Faster RCNN-R101-FPN (COCO)",
+        "AP +4.30 vs Faster RCNN-DC5+ (COCO)",
+        "AP +3.40 vs Faster RCNN-FPN+ (COCO)",
+        "AP +7.20 vs Faster RCNN-DC5 (COCO)",
+        "AP +6.00 vs Faster RCNN-FPN (COCO)",
+        "AP +4.20 vs Faster RCNN-R101-FPN (COCO)",
+        "AP +5.10 vs Faster RCNN-DC5+ (COCO)",
+        "AP +4.20 vs Faster RCNN-FPN+ (COCO)",
+        "The new model requires extra-long training schedule and benefits from auxiliary decoding losses in the transformer."
+      ],
+      "status": "evaluated"
+    },
+    {
+      "cluster_id": "CL-007",
+      "dimension": "泛化性与部署稳健性",
+      "score": 2.0,
+      "confidence": "high",
+      "evidence": [
+        "covers 1 datasets: COCO"
+      ],
+      "status": "evaluated"
+    },
+    {
+      "cluster_id": "CL-008",
+      "dimension": "统计严谨性与披露",
+      "score": 1.0,
+      "confidence": "high",
+      "evidence": [
+        "no variance/std disclosure detected"
+      ],
+      "status": "evaluated"
+    },
+    {
+      "cluster_id": "CL-009",
+      "dimension": "可复现性",
+      "score": 5.0,
+      "confidence": "high",
+      "evidence": [
+        "Training code and pretrained models are available at https://github.com/facebookresearch/detr.",
+        "Unlike most existing detection methods, DETR doesn’t require any customized layers, and thus can be reproduced easily in any framework that contains standard CNN and transformer classes.",
+        "Inference code for DETR can be implemented in less than 50 lines in PyTorch."
+      ],
+      "status": "evaluated"
+    },
+    {
+      "cluster_id": "CL-010",
+      "dimension": "开放性与资源可得性",
+      "score": 5.0,
+      "confidence": "high",
+      "evidence": [
+        "Training code and pretrained models are available at https://github.com/facebookresearch/detr.",
+        "Unlike most existing detection methods, DETR doesn’t require any customized layers, and thus can be reproduced easily in any framework that contains standard CNN and transformer classes.",
+        "Inference code for DETR can be implemented in less than 50 lines in PyTorch."
+      ],
+      "status": "evaluated"
+    },
+    {
+      "cluster_id": "CL-011",
+      "dimension": "数据集贡献",
+      "score": 0.0,
+      "confidence": "high",
+      "evidence": [],
+      "status": "evaluated"
+    },
+    {
+      "cluster_id": "CL-012",
+      "dimension": "表述清晰度",
+      "score": 5.0,
+      "confidence": "high",
+      "evidence": [
+        "The overall DETR architecture is surprisingly simple and depicted in Figure 2.",
+        "It contains three main components, which we describe below: a CNN backbone to extract a compact feature representation, an encoder-decoder transformer, and a simple feed forward network (FFN) that makes the final detection prediction.",
+        "Unlike many modern detectors, DETR can be implemented in any deep learning framework that provides a common CNN backbone and a transformer architecture implementation with just a few hundred lines.",
+        "We hope that the simplicity of our method will attract new researchers to the detection community."
+      ],
+      "status": "evaluated"
+    },
+    {
+      "cluster_id": "CL-013",
+      "dimension": "相关工作与引用充分性",
+      "score": 5.0,
+      "confidence": "high",
+      "evidence": [
+        "Our work build on prior work in several domains: bipartite matching losses for set prediction, encoder-decoder architectures based on the transformer, parallel decoding, and object detection methods.",
+        "There is no canonical deep learning model to directly predict sets.",
+        "The basic set prediction task is multilabel classification (see e.g., [40,33] for references in the context of computer vision) for which the baseline approach, one-vs-rest, does not apply to problems such as detection where there is an underlying structure between elements (i.e., near-identical boxes).",
+        "The first difficulty in these tasks is to avoid near-duplicates.",
+        "Most current detectors use postprocessings such as non-maximal suppression to address this issue, but direct set prediction are postprocessing-free.",
+        "They need global inference schemes that model interactions between all predicted elements to avoid redundancy.",
+        "For constant-size set prediction, dense fully connected networks [9] are sufficient but costly.",
+        "A general approach is to use auto-regressive sequence models such as recurrent neural networks [48].",
+        "In all cases, the loss function should be invariant by a permutation of the predictions.",
+        "The usual solution is to design a loss based on the Hungarian algorithm [20], to find a bipartite matching between ground-truth and prediction.",
+        "This enforces permutation-invariance, and guarantees that each target element has a unique match.",
+        "We follow the bipartite matching loss approach.",
+        "In contrast to most prior work however, we step away from autoregressive models and use transformers with parallel decoding, which we describe below.",
+        "Transformers were introduced by Vaswani et al. [47] as a new attention-based building block for machine translation.",
+        "Attention mechanisms [2] are neural network layers that aggregate information from the entire input sequence.",
+        "Transformers introduced self-attention layers, which, similarly to Non-Local Neural Networks [49], scan through each element of a sequence and update it by aggregating information from the whole sequence.",
+        "One of the main advantages of attention-based models is their global computations and perfect memory, which makes them more suitable than RNNs on long sequences.",
+        "Transformers are now replacing RNNs in many problems in natural language processing, speech processing and computer vision [8,27,45,34,31].",
+        "Transformers were first used in auto-regressive models, following early sequence-to-sequence models [44], generating output tokens one by one.",
+        "However, the prohibitive inference cost (proportional to output length, and hard to batch) lead to the development of parallel sequence generation, in the domains of audio [29], machine translation [12,10], word representation learning [8], and more recently speech recognition [6].",
+        "We also combine transformers and parallel decoding for their suitable trade-off between computational cost and the ability to perform the global computations required for set prediction.",
+        "Most modern object detection methods make predictions relative to some initial guesses.",
+        "Two-stage detectors [37,5] predict boxes w.r.t. proposals, whereas single-stage methods make predictions w.r.t. anchors [23] or a grid of possible object centers [53,46].",
+        "Recent work [52] demonstrate that the final performance of these systems heavily depends on the exact way these initial guesses are set.",
+        "In our model we are able to remove this hand-crafted process and streamline the detection process by directly predicting the set of detections with absolute box prediction w.r.t. the input image rather than an anchor.",
+        "Set-based loss. Several object detectors [9,25,35] used the bipartite matching loss.",
+        "However, in these early deep learning models, the relation between different prediction was modeled with convolutional or fully-connected layers only and a hand-designed NMS post-processing can improve their performance.",
+        "More recent detectors [37,23,53] use non-unique assignment rules between ground truth and predictions together with an NMS.",
+        "Learnable NMS methods [16,4] and relation networks [17] explicitly model relations between different predictions with attention.",
+        "Using direct set losses, they do not require any post-processing steps.",
+        "However, these methods employ additional hand-crafted context features like proposal box coordinates to model relations between detections efficiently, while we look for solutions that reduce the prior knowledge encoded in the model.",
+        "Recurrent detectors. Closest to our approach are end-to-end set predictions for object detection [43] and instance segmentation [41,30,36,42].",
+        "Similarly to us, they use bipartite-matching losses with encoder-decoder architectures based on CNN activations to directly produce a set of bounding boxes.",
+        "These approaches, however, were only evaluated on small datasets and not against modern baselines.",
+        "In particular, they are based on autoregressive models (more precisely RNNs), so they do not leverage the recent transformers with parallel decoding."
+      ],
+      "status": "evaluated"
+    },
+    {
+      "cluster_id": "CL-014",
+      "dimension": "伦理合规",
+      "score": 0.0,
+      "confidence": "high",
+      "evidence": [],
+      "status": "evaluated"
+    },
+    {
+      "cluster_id": "CL-015",
+      "dimension": "局限性与诚实评估",
+      "score": 4.0,
+      "confidence": "high",
+      "evidence": [
+        "It obtains, however, lower performances on small objects.",
+        "We expect that future work will improve this aspect in the same way the development of FPN did for Faster R-CNN.",
+        "The new model requires extra-long training schedule and benefits from auxiliary decoding losses in the transformer."
+      ],
+      "status": "evaluated"
+    },
+    {
+      "cluster_id": "NE-00",
+      "dimension": "学科归一化引文影响力",
+      "score": null,
+      "confidence": "medium",
+      "evidence": [],
+      "status": "not_evaluated"
+    },
+    {
+      "cluster_id": "NE-01",
+      "dimension": "引文有效性与边界",
+      "score": null,
+      "confidence": "medium",
+      "evidence": [],
+      "status": "not_evaluated"
+    },
+    {
+      "cluster_id": "NE-02",
+      "dimension": "社会/综合影响力",
+      "score": null,
+      "confidence": "medium",
+      "evidence": [],
+      "status": "not_evaluated"
+    },
+    {
+      "cluster_id": "NE-03",
+      "dimension": "文章级影响力指标",
+      "score": null,
+      "confidence": "medium",
+      "evidence": [],
+      "status": "not_evaluated"
+    },
+    {
+      "cluster_id": "NE-04",
+      "dimension": "Altmetrics",
+      "score": null,
+      "confidence": "medium",
+      "evidence": [],
+      "status": "not_evaluated"
+    },
+    {
+      "cluster_id": "NE-05",
+      "dimension": "期刊层指标与边界",
+      "score": null,
+      "confidence": "medium",
+      "evidence": [],
+      "status": "not_evaluated"
+    },
+    {
+      "cluster_id": "NE-06",
+      "dimension": "作者层指标",
+      "score": null,
+      "confidence": "medium",
+      "evidence": [],
+      "status": "not_evaluated"
+    },
+    {
+      "cluster_id": "RV-00",
+      "dimension": "组合新颖性",
+      "score": null,
+      "confidence": "medium",
+      "evidence": [],
+      "status": "review"
+    },
+    {
+      "cluster_id": "RV-01",
+      "dimension": "作者声望偏差",
+      "score": null,
+      "confidence": "medium",
+      "evidence": [],
+      "status": "review"
+    },
+    {
+      "cluster_id": "RV-02",
+      "dimension": "新颖性-影响-性能平衡",
+      "score": null,
+      "confidence": "medium",
+      "evidence": [],
+      "status": "review"
+    }
+  ],
+  "summary": {
+    "weighted_score": 3.57,
+    "weights": {
+      "CL-001": 1.0,
+      "CL-003": 1.0,
+      "CL-004": 1.0,
+      "CL-005": 1.0,
+      "CL-006": 1.0,
+      "CL-007": 1.0,
+      "CL-008": 1.0,
+      "CL-009": 1.0,
+      "CL-010": 1.0,
+      "CL-011": 1.0,
+      "CL-012": 1.0,
+      "CL-013": 1.0,
+      "CL-014": 1.0,
+      "CL-015": 1.0
+    },
+    "strengths": [
+      "创新性/新颖性 (5.0)",
+      "学术贡献度 (5.0)",
+      "声明-证据一致性 (5.0)"
+    ],
+    "weaknesses": [
+      "统计严谨性与披露 (1.0)",
+      "数据集贡献 (0.0)",
+      "伦理合规 (0.0)"
+    ],
+    "conclusion": "整体评分 3.57/5；主要优势：创新性/新颖性 (5.0)、学术贡献度 (5.0)、声明-证据一致性 (5.0)；主要不足：统计严谨性与披露 (1.0)、数据集贡献 (0.0)、伦理合规 (0.0)。",
+    "caveats": []
+  }
+}

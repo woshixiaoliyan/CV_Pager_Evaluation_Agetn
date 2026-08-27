@@ -24,3 +24,18 @@ def test_build_summary_equal_weights():
     assert summary.weighted_score == 3.0
     assert summary.strengths[0] == "A (4.0)"
     assert summary.weaknesses[0] == "B (2.0)"
+
+
+def test_score_dimensions_normalizes_numeric_confidence():
+    kb = {"dimensions": [
+        {"cluster_id": "CL-001", "name": "创新性/新颖性", "status": "evaluated"},
+    ]}
+
+    class FakeChatNumeric:
+        def chat_json(self, system, user):
+            return {"dimension_scores": [
+                {"cluster_id": "CL-001", "score": 4, "confidence": 0.9, "evidence": ["x"]}
+            ]}
+
+    scores = score_dimensions(FakeChatNumeric(), [], {}, kb)
+    assert scores[0].confidence == "high"
