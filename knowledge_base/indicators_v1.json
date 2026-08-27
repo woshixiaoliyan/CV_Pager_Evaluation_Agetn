@@ -1,0 +1,49 @@
+{
+  "dimensions": [
+    {"cluster_id": "CL-001", "name": "创新性/新颖性", "question": "论文提出的问题、方法或机制与已有工作的差异度如何？", "criteria_high": "提出新问题/新范式/新机制，与已有方法存在本质差异且论证充分", "criteria_mid": "存在明确的改进或组合创新，与已有方法差异可辨", "criteria_low": "主要是参数或工程性调整，缺乏新意", "sources": ["阶段一文献调研：CVPR/ICCV 评审指南与创新性评价研究"], "status": "evaluated"},
+    {"cluster_id": "CL-003", "name": "学术贡献度", "question": "论文对领域的贡献是否清晰、可归因、有分量？", "criteria_high": "贡献明确且被实验/分析充分支撑，可独立评估", "criteria_mid": "贡献可辨但部分依赖主观断言", "criteria_low": "贡献模糊或与证据不匹配", "sources": ["阶段一文献调研：论文贡献评价框架"], "status": "evaluated"},
+    {"cluster_id": "CL-004", "name": "技术稳健性", "question": "方法在多个基准上的性能提升是否一致、稳定？", "criteria_high": "多数据集/多设置一致提升，波动小", "criteria_mid": "多数基准提升但存在例外", "criteria_low": "提升微弱、不一致或只在单一有利设置出现", "sources": ["阶段一文献调研：技术稳健性维度"], "status": "evaluated"},
+    {"cluster_id": "CL-005", "name": "声明-证据一致性", "question": "正文声明（含 SOTA 声明）是否被表格/实验数据支持？", "criteria_high": "所有声明与数据自洽，无夸大", "criteria_mid": "个别表述略有出入但不影响结论", "criteria_low": "声明与数据明显矛盾", "sources": ["阶段一文献调研：声明-证据一致性簇"], "status": "evaluated"},
+    {"cluster_id": "CL-006", "name": "实验有效性与偏置控制", "question": "实验设计是否控制了变量、进行了消融、排除偏置？", "criteria_high": "消融完整、控制变量清晰、公平对比", "criteria_mid": "部分消融或对比公平性存疑", "criteria_low": "无消融、对比不公平或设置不透明", "sources": ["阶段一文献调研：实验有效性簇"], "status": "evaluated"},
+    {"cluster_id": "CL-007", "name": "泛化性与部署稳健性", "question": "方法在多大范围的数据/任务/场景下验证？", "criteria_high": "跨多数据集/多任务/多领域验证", "criteria_mid": "覆盖 2-3 个数据集或同域迁移", "criteria_low": "单一数据集/单一场景", "sources": ["阶段一文献调研：泛化性簇"], "status": "evaluated"},
+    {"cluster_id": "CL-008", "name": "统计严谨性与披露", "question": "是否报告方差、显著性检验、重复实验等统计信息？", "criteria_high": "报告多 seed 均值±方差/显著性检验", "criteria_mid": "部分披露但不够系统", "criteria_low": "仅报告单次数值", "sources": ["阶段一文献调研：统计严谨性簇"], "status": "evaluated"},
+    {"cluster_id": "CL-009", "name": "可复现性", "question": "代码、超参、数据版本、训练设置是否足以复现？", "criteria_high": "代码/超参/数据版本齐全且可运行", "criteria_mid": "部分资源或关键设置缺失", "criteria_low": "无任何复现资源", "sources": ["阶段一文献调研：可复现性簇（11 条证据）"], "status": "evaluated"},
+    {"cluster_id": "CL-010", "name": "开放性与资源可得性", "question": "数据、模型、代码是否开放可获取？", "criteria_high": "主要资源全部开放", "criteria_mid": "部分资源开放", "criteria_low": "全部私有", "sources": ["阶段一文献调研：开放性与资源可得性簇"], "status": "evaluated"},
+    {"cluster_id": "CL-011", "name": "数据集贡献", "question": "论文是否贡献了新的数据集/基准？质量如何？", "criteria_high": "新数据集规模大、标注规范、可获取", "criteria_mid": "新数据集规模有限或质量存疑", "criteria_low": "无数据集贡献", "sources": ["阶段一文献调研：数据集贡献簇"], "status": "evaluated"},
+    {"cluster_id": "CL-012", "name": "表述清晰度", "question": "论文结构、写作与图表是否清晰易懂？", "criteria_high": "结构完整、术语一致、图表有效", "criteria_mid": "基本清晰但有局部含糊", "criteria_low": "结构混乱或关键部分难以理解", "sources": ["阶段一文献调研：表述清晰度簇"], "status": "evaluated"},
+    {"cluster_id": "CL-013", "name": "相关工作与引用充分性", "question": "相关工作梳理与引用是否充分、准确？", "criteria_high": "覆盖关键文献且定位准确", "criteria_mid": "覆盖基本充分但有遗漏", "criteria_low": "相关工作缺失或引用不当", "sources": ["阶段一文献调研：相关工作簇"], "status": "evaluated"},
+    {"cluster_id": "CL-014", "name": "伦理合规", "question": "是否声明潜在伦理/社会风险并给出合规处理？", "criteria_high": "明确伦理声明与风险缓解", "criteria_mid": "提及但较简略", "criteria_low": "无任何伦理考虑", "sources": ["阶段一文献调研：伦理合规簇"], "status": "evaluated"},
+    {"cluster_id": "CL-015", "name": "局限性与诚实评估", "question": "是否如实披露方法局限与失败案例？", "criteria_high": "局限清晰、诚实、有边界说明", "criteria_mid": "有局限说明但不够具体", "criteria_low": "无局限性披露或回避失败", "sources": ["阶段一文献调研：局限性簇"], "status": "evaluated"}
+  ],
+  "metric_schema": {
+    "direction_defaults": {"fid": "lower", "kid": "lower", "sfid": "lower", "fvd": "lower", "epe": "lower", "rmse": "lower", "absrel": "lower", "cer": "lower", "ece": "lower", "mce": "lower", "lpips": "lower", "niqe": "lower", "piqe": "lower", "brisque": "lower", "musiq": "lower"},
+    "range_hints": {"accuracy": [0, 1], "precision": [0, 1], "recall": [0, 1], "f1": [0, 1], "map": [0, 1], "miou": [0, 1], "iou": [0, 1], "ssim": [0, 1], "psnr": [0, 100], "fid": [0, 1000], "fps": [0, 100000]},
+    "variant_notes": {"mAP@0.5": "PASCAL 风格，不可与 mAP@0.5:0.95 混比", "mAP@0.5:0.95": "COCO 风格"}
+  },
+  "mapping": [
+    {"evidence": "relative_improvement_vs_baseline", "dimensions": ["CL-003", "CL-004"]},
+    {"evidence": "dataset_coverage", "dimensions": ["CL-007"]},
+    {"evidence": "ablation_completeness", "dimensions": ["CL-006", "CL-003"]},
+    {"evidence": "statistical_disclosure", "dimensions": ["CL-008"]},
+    {"evidence": "table_text_consistency", "dimensions": ["CL-005"]},
+    {"evidence": "openness_artifacts", "dimensions": ["CL-009", "CL-010"]},
+    {"evidence": "novelty_claims", "dimensions": ["CL-001"]},
+    {"evidence": "related_work", "dimensions": ["CL-013"]},
+    {"evidence": "ethics_statement", "dimensions": ["CL-014"]},
+    {"evidence": "limitations", "dimensions": ["CL-015"]}
+  ],
+  "not_evaluated_dimensions": [
+    {"name": "学科归一化引文影响力", "reason": "需外部引文数据（未联网）"},
+    {"name": "引文有效性与边界", "reason": "需外部引文数据（未联网）"},
+    {"name": "社会/综合影响力", "reason": "需外部数据且操作化困难"},
+    {"name": "文章级影响力指标", "reason": "需外部数据（未联网）"},
+    {"name": "Altmetrics", "reason": "需外部数据且可操纵，仅作辅助"},
+    {"name": "期刊层指标与边界", "reason": "期刊层信息，非论文自身属性"},
+    {"name": "作者层指标", "reason": "作者层信息，非论文自身属性"}
+  ],
+  "review_dimensions": [
+    {"name": "组合新颖性", "reason": "与创新性语义相近但不完全等价，待人工审核"},
+    {"name": "作者声望偏差", "reason": "属流程偏差控制项，待人工审核"},
+    {"name": "新颖性-影响-性能平衡", "reason": "属权重/决策规则，待人工审核"}
+  ]
+}
